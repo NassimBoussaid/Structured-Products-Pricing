@@ -8,4 +8,9 @@ class Maturity:
         self.time_to_maturity = None
 
     def calculate_time_to_maturity(self):
-        pass
+        if self.convention_date == "actual_365":
+            self.time_to_maturity = (self.maturity_date - self.value_date).days / 365
+        elif self.convention_date == "actual_360":
+            self.time_to_maturity = (self.maturity_date - self.value_date).days / 360
+        else:
+            pass
