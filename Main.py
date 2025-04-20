@@ -15,13 +15,14 @@ from Strategies.StrategiesOption.StrategyCondorSpread import StrategyCondorSprea
 from Strategies.StrategiesOption.StrategyStraddle import StrategyStraddle
 from Strategies.StrategiesOption.StrategyStrangle import StrategyStrangle
 from Strategies.StrategiesOption.StrategyPutSpread import StrategyPutSpread
+from Strategies.StrategiesOption.StrategyDigitalReplication import StrategyDigitalReplication
 
-Market_Info = Market(100, 0.2, 0.02, "Continuous",
+Market_Info = Market(200, 0.5, 0.02, "Continuous",
                      0, 0, datetime(2024, 6, 1))
 Pricer_Info = PricerMC(datetime(2024, 1, 1), 100, 100000, 1)
 #Pricer_Info = PricerBS(datetime(2024, 1, 1))
 #a = StrategyRiskReversal(Market_Info, Pricer_Info, 80, 120, datetime(2025, 1, 1))
-a = StrategyPutSpread(Market_Info, Pricer_Info, 80, 100, datetime(2025, 1, 1))
+a = StrategyDigitalReplication(Market_Info, Pricer_Info, "Call", 100, 0.5, datetime(2025, 1, 1))
 price = a.price()
 print(price)
 #Option_Info = OptionBarrier("Call", 100, datetime(2025, 1, 1), "in", "up", 120, "European")
