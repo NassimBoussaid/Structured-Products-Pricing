@@ -13,8 +13,8 @@ class StrategyBase(ABC):
 
     def price(self):
         price = 0
-        for i, product in enumerate(self.products_params):
-            price += product.compute_price() * self.quantities[i]
+        for product, quantity in zip(self.products_params, self.quantities):
+            price += product.compute_price() * quantity
         return price
 
     def display_strategy(self):

@@ -7,7 +7,7 @@ from structured_products_pricing.Strategies.StrategiesOption.StrategyPutSpread i
 
 class StrategyDigitalReplication(StrategyBase):
     def __init__(self, MarketObject: Market, PricerObject: PricerBase, option_type: str, strike: float, epsilon: float,
-                 maturity_date: datetime):
+                 maturity_date: datetime, coupon_level: float = 1):
         super().__init__(MarketObject, PricerObject)
         self.strategy_name = "Digital Replication"
         if option_type == "Call":
@@ -15,5 +15,5 @@ class StrategyDigitalReplication(StrategyBase):
         elif option_type == "Put":
             options = StrategyPutSpread(self.Market, self.Pricer, strike - epsilon, strike, maturity_date)
         self.products_params = options.products_params
-        digital_gearing = 1 / epsilon
+        digital_gearing = coupon_level / epsilon
         self.quantities = [digital_gearing, -digital_gearing]
