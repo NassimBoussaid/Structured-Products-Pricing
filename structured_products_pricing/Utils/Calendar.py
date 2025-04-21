@@ -3,6 +3,7 @@ import pandas as pd
 from typing import List
 from workalendar.usa import UnitedStates
 
+
 class Calendar:
     """
     Classe de gestion du calendrier de trading :
@@ -15,7 +16,7 @@ class Calendar:
         'weekly': 'W',
         'monthly': 'ME',
         'quarterly': 'Q',
-        'yearly': 'A',
+        'yearly': 'YE',
     }
 
     CALENDAR = UnitedStates()
@@ -117,3 +118,22 @@ class Calendar:
             for date in scheduled_dates
         )
         return set(observation_dates)
+
+    @staticmethod
+    def year_fraction(start: datetime, end: datetime, convention: str) -> float:
+        """
+        Calcule la fraction d'année entre deux dates selon :
+         - '30/360'  30/360
+         - 'act/360' Actual/360
+         - 'act/365.25' Actual/365.25 (année bisextile)
+        """
+        days = (end - start).days
+        conv = convention.lower()
+        if conv == '30/360':
+            d1, d2 = min(start.day, 30), min(end.day, 30)
+            m1, m2 = start.month, end.month
+            y1, y2 = start.year, end.year
+            return (360 * (y2 - y1) + 30 * (m2 - m1) + (d2 - d1)) / 360.0
+        if conv == 'act/360':
+            return days / 360.0
+        return days / 365.25  # act/365.25 par défaut
