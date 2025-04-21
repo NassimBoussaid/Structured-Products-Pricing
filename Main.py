@@ -2,6 +2,8 @@ from structured_products_pricing.Parameters.Option.OptionEuropean import OptionE
 from structured_products_pricing.Parameters.Market import Market
 from structured_products_pricing.Parameters.Pricer.PricerMC import PricerMC
 from datetime import datetime
+
+from structured_products_pricing.Rate.RateCurve import RateCurve
 from structured_products_pricing.Strategies.StrategiesOption.StrategyDigitalReplication import StrategyDigitalReplication
 from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredBarrierReverseConvertible import \
     StrategyStructuredBarrierReverseConvertible
@@ -19,8 +21,8 @@ a = StrategyStructuredBarrierReverseConvertible(Market_Info, Pricer_Info, 100, 8
 #a = StrategyVanilla(Market_Info, Option_Info, Pricer_Info)
 #a = StrategyCertificateDiscount(Market_Info, Pricer_Info, 115, datetime(2025, 1, 1))
 #a = StrategyCertificateAirbag(Market_Info, Pricer_Info, 80, 120, datetime(2025, 1, 1))
-price = a.price()
-print(price)
+#price = a.price()
+#print(price)
 #Option_Info = OptionBarrier("Call", 100, datetime(2025, 1, 1), "in", "up", 120, "European")
 #Params_Info = ModelParams(Market_Info, Option_Info, Pricer_Info)
 #a = StrategyVanilla([Params_Info], [1])
@@ -29,3 +31,7 @@ print(price)
 #MC = MonteCarlo(Params_Info)
 #price = MC.price_vector()
 #print(price)
+
+rate_curve = RateCurve(0.01, 0.01, 0.01, 1)
+rate_curve.compute_yield_curve()
+print(rate_curve.get_yield(0.33))
