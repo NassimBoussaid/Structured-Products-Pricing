@@ -192,6 +192,7 @@ class OptionPricerTree(OptionPricerBase):
         Returns:
         - float. The option price.
         """
+        self.create_tree()
         current_node: Node = self.last_node
         prev_node: Node = current_node.node_behind
         # Add intrinsic value to the last column
@@ -238,63 +239,3 @@ class OptionPricerTree(OptionPricerBase):
         while current_node.node_down is not None:
             current_node = current_node.node_down
             current_node.price = current_node.compute_intrinsic_value()
-
-    def graph_tree(self):
-        """
-        Graphs tree using plotly.
-        """
-        # List for all existing nodes
-        list_node, xe, ye = self.generate_nodes_and_links()
-        # X and Y axis to represent nodes
-        xn = [node.layer for node in list_node]
-        yn = [node.und_price for node in list_node]
-        info_list = []
-        # Loop to create the information for each node
-        for node in list_node:
-            if node.p_mid is not None:
-                info_list.append([f"price : {round(node.und_price, 2)}",
-                                  f"P_Up : {round(node.p_up, 2)}",
-                                  f"P_Mid : {round(node.p_mid, 2)}",
-                                  f"P_Down : {round(node.p_down, 2)}",
-                                  f"P_Cum : {round(node.p_cum, 7)}"])
-            else:
-                info_list.append([f"price : {round(node.und_price, 2)}",
-                                  f"P_Up : {node.p_up}",
-                                  f"P_Mid : {node.p_mid}",
-                                  f"P_Down : {node.p_down}",
-                                  f"P_Cum : {round(node.p_cum, 7)}"])
-        node_scale = [max(10, 20 * node.p_cum) for node in list_node]
-        node_color = ["#D096E4" if node.is_exercised else "#77B5CB" for node in list_node]
-        fig = go.Figure()
-        # Load graph for links
-        fig.add_trace(go.Scattergl(x=xe, y=ye, mode='lines', name='Link',
-                                   line=dict(color='rgb(210,210,210)', width=1), hoverinfo='none'))
-        # Load graph for nodes
-        fig.add_trace(go.Scatter(x=xn, y=yn, mode='markers+text', name='Node',
-                                 marker=dict(symbol='circle-dot', size=node_scale, color=node_color,
-                                             line=dict(color='rgb(50,50,50)', width=1)),
-                                 opacity=0.8, hovertemplate=['<br>'.join(info) for info in info_list]))
-        # Display graph
-        fig.show()
-
-    def generate_nodes_and_links(self) -> Tuple[List, List[float], List[float]]:
-        """
-        Generates the list of nodes and their links for the tree graph.
-
-        Returns:
-        - list_node: List of all nodes in the tree.
-        - xe: X-axis coordinates for links between nodes.
-        - ye: Y-axis coordinates for links between nodes.
-        """
-        list_node = []
-        # X and Y axis to represent "links" between nodes
-        xe, ye = [], []
-        # Loop to create the list of nodes and links
-        for node_1, node_2 in self.edge:
-            xe += [node_1.layer, node_2.layer, None]
-            ye += [node_1.und_price, node_2.und_price, None]
-            if node_1 not in list_node:
-                list_node.append(node_1)
-            if node_2 not in list_node:
-                list_node.append(node_2)
-        return list_node, xe, ye

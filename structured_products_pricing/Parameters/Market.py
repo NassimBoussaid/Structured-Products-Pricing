@@ -14,12 +14,11 @@ class Market:
         self.vol: float = volatility
         self.int_rate: float = interest_rate
         self.discount_curve = RateFlat.flat(self.int_rate)
-
         self.div_date: datetime = dividend_date
+        self.time_to_div: float = None
         if div_mode.lower() == "continuous":
             self.div_rate: float = dividend_rate
             self.div_discrete: float = 0
         elif div_mode.lower() == "discrete":
             self.div_discrete: float = dividend_discrete
             self.div_rate: float = 0
-            self.time_to_div: float = None

@@ -133,10 +133,10 @@ class Node:
         Discounted_Value *= exp(-self.tree.Market.int_rate * self.tree.dt)
 
         # Check if the option is european
-        if self.tree.Option.is_european():
+        if self.tree.Option.option_name == "European":
             self.price = Discounted_Value
         # Check if the option is american
-        elif self.tree.Option.is_american():
+        elif self.tree.Option.option_name == "American":
             self.price = max(Discounted_Value, self.compute_intrinsic_value())
             if self.compute_intrinsic_value() > Discounted_Value:
                 # Used for determining the exercise barrier
@@ -164,7 +164,7 @@ class Node:
         """
         # Check if the dividend is paid in the next window and adapt the formula
         if self.trunc.is_div_next_period:
-            return self.und_price * exp(self.tree.Market.int_rate * self.tree.dt) - self.tree.Market.discrete_div
+            return self.und_price * exp(self.tree.Market.int_rate * self.tree.dt) - self.tree.Market.div_discrete
         else:
             return self.und_price * exp(self.tree.Market.int_rate * self.tree.dt)
 
