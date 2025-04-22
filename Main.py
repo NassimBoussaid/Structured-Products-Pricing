@@ -9,6 +9,7 @@ from structured_products_pricing.Parameters.Pricer.PricerMC import PricerMC
 from datetime import datetime
 
 from structured_products_pricing.Products.Bond.InterestRateSwap import InterestRateSwap
+from structured_products_pricing.Products.Bond.RangeAccrualNote import RangeAccrualNote
 from structured_products_pricing.Rate.RateCurve import RateCurve
 
 from structured_products_pricing.Strategies.StrategiesOption.StrategyDigitalReplication import \
@@ -92,3 +93,19 @@ swap = InterestRateSwap(
 )
 price = pricer.price(swap, Market_Info)
 print(f"Prix Interest Rate Swap : {price:.4f}")
+
+# Range Accrual  -> bof il faudrait qu'on ait un MC pour les taux, à enlever je pense
+rng_acc = RangeAccrualNote(
+        notional=1,
+        issue_date='2025-01-01',
+        maturity_date='2027-01-01',
+        index_curve=rate_curve,
+        coupon_rate=0.05,
+        low=0.015,
+        high=0.025,
+        participation=1.0,
+        frequency='yearly',
+        day_count='act/365.25'
+    )
+price = pricer.price(rng_acc, Market_Info)
+print(f"Prix Range Accrual : {price:.4f}")
