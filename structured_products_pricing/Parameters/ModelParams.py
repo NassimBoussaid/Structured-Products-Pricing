@@ -11,4 +11,4 @@ class ModelParams:
         self.Option: OptionBase = OptionObject
         self.Pricer: PricerBase = PricerObject
         self.Option.time_to_maturity = (self.Option.maturity_date - self.Pricer.pricing_date).days / 365
-        self.Option.time_to_div = (self.Market.div_date - self.Pricer.pricing_date).days / 365
+        self.Market.time_to_div = (self.Market.div_date - self.Pricer.pricing_date).days / 365

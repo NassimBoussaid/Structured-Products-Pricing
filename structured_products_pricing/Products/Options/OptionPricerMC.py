@@ -1,5 +1,6 @@
 from structured_products_pricing.Utils.Brownian import Brownian
 from structured_products_pricing.Parameters.ModelParams import ModelParams
+from structured_products_pricing.Utils.Calendar import Calendar
 from structured_products_pricing.Utils.RegressionModel import RegressionModel
 from structured_products_pricing.Products.Options.OptionPricerBase import OptionPricerBase
 import numpy as np
@@ -96,6 +97,7 @@ class OptionPricerMC(OptionPricerBase):
         # Generate independent Brownian motion paths
         brownian_paths: np.array = brownian_simulator.MotionVector()
         # Compute the simulated asset price at maturity
+        S_T: np.array = self.compute_asset_price(brownian_paths, full_paths=True, use_incremental_method=True)
         if (self.Option.option_name == "Barrier" and self.Option.barrier_exercise == "American") or self.Option.option_name == "Asian":
             S_T: np.array = self.compute_asset_price(brownian_paths, full_paths=True, use_incremental_method=True)
         else:
@@ -109,6 +111,32 @@ class OptionPricerMC(OptionPricerBase):
 
         # return np.array((price, std))
         return np.array(price)
+
+    def compute_maturity_probabilities(self):
+        # Initialize the Brownian motion class
+        brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps, self.Pricer.nb_draws,
+                                                self.Pricer.seed)
+        # Generate independent Brownian motion paths
+        brownian_paths: np.array = brownian_simulator.MotionVector()
+        # Compute the simulated asset price at maturity
+        S_t: np.array = self.compute_asset_price(brownian_paths, full_paths=True, use_incremental_method=True)
+        calendar = Calendar("monthly", self.Pricer.pricing_date, self.Option.maturity_date)
+        observation_dates = calendar.observation_dates
+        time_to_observation = [(observation - self.Pricer.pricing_date).days / 365 for observation in observation_dates]
+        observation_steps = [int(observation / self.dt) + 1 for observation in time_to_observation]
+        observation_steps[-1] = self.Pricer.nb_steps
+        already_breached = np.array([False] * len(S_t))
+        autocall_prob = []
+        for step in observation_steps:
+            current_asset_price = S_t[:, step]
+            current_logic = np.logical_and(current_asset_price > 100, ~already_breached)
+            already_breached[current_logic] = True
+            autocall_prob.append(float(np.sum(current_logic) / len(S_t)))
+        # care quand on a juste une obs
+        autocall_prob[-1] = round(1 - sum(autocall_prob), 3)
+        #print(autocall_prob)
+        #print(sorted(observation_dates))
+        return autocall_prob
 
     def price_LS(self) -> float:
         """
