@@ -15,9 +15,7 @@ class FixedRateBond(BondBase):
             coupon_rate: float,
             frequency: str = 'yearly',
             day_count: str = 'act/365.25'):
-        super().__init__(notional=notional)
-        self.issue_date = datetime.fromisoformat(issue_date) if isinstance(issue_date, str) else issue_date
-        self.maturity_date = datetime.fromisoformat(maturity_date) if isinstance(maturity_date, str) else maturity_date
+        super().__init__(notional=notional, issue_date=issue_date, maturity_date=maturity_date)
         self.coupon_rate = coupon_rate
         self.frequency = frequency
         self.day_count = day_count

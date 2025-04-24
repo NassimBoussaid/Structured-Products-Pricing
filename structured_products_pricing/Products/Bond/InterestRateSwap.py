@@ -3,12 +3,13 @@ from datetime import datetime
 from typing import Union, List
 from collections import defaultdict
 
+from structured_products_pricing.Products.Bond.BondBase import BondBase
 from structured_products_pricing.Products.Bond.CashFlow import CashFlow
 from structured_products_pricing.Products.Bond.BondFixedRate import FixedRateBond
 from structured_products_pricing.Products.Bond.BondFloatingRate import FloatingRateBond
 
 
-class InterestRateSwap:
+class InterestRateSwap(BondBase):
     """
     Interest Rate Swap (IRS) combinant une patte fixe et une patte flottante.
 
@@ -35,7 +36,7 @@ class InterestRateSwap:
             frequency: str = 'yearly',
             day_count: str = 'act/365.25'
     ):
-        self.notional = notional
+        super().__init__(notional=notional, issue_date=issue_date, maturity_date=maturity_date)
         # création des deux legs
         self.fixed_leg = FixedRateBond(
             notional=notional,

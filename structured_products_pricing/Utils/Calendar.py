@@ -1,5 +1,8 @@
 from datetime import datetime
+from typing import List
+
 import pandas as pd
+
 
 class Calendar:
     """
@@ -14,7 +17,7 @@ class Calendar:
         'yearly': 'YE',
     }
 
-    def __init__(self, frequency: str, start_date: str, end_date: str):
+    def __init__(self, start_date: str, end_date: str, frequency='yearly'):
         """
         Initialisation de la classe Calendar.
 
@@ -40,6 +43,7 @@ class Calendar:
 
         self.frequency = frequency
         self.observation_dates = self._generate_observation_dates()
+        self.all_dates = self._generate_all_trading_dates()
 
     def _generate_observation_dates(self) -> set[datetime]:
         """
@@ -51,3 +55,23 @@ class Calendar:
         observation_dates = pd.date_range(start=self.start_date, end=self.end_date, freq=freq_alias).to_pydatetime()
         observation_dates[-1] = self.end_date.to_pydatetime()
         return observation_dates
+
+    def _generate_all_trading_dates(self) -> List[datetime]:
+        """
+        Génération des jours de trading dans la plage définie, hors week-ends.
+
+        :return: Liste des jours de trading.
+        """
+        all_business_days = pd.bdate_range(start=self.start_date, end=self.end_date, freq='C').tolist()
+        return all_business_days
+
+    @staticmethod
+    def year_fraction(start: datetime, end: datetime, convention: str) -> float:
+        days = (end - start).days
+        conv = convention.lower()
+        if conv == '30/360':
+            d1, d2 = min(start.day, 30), min(end.day, 30)
+            return ((end.year - start.year) * 360 + (end.month - start.month) * 30 + (d2 - d1)) / 360
+        if conv == 'act/360':
+            return days / 360
+        return days / 365.25

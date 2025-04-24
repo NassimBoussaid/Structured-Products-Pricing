@@ -32,15 +32,7 @@ class FloatingRateBond(BondBase):
             frequency: str = 'yearly',
             day_count: str = 'act/365.25'
     ):
-        super().__init__(notional)
-        self.issue_date = (
-            datetime.fromisoformat(issue_date)
-            if isinstance(issue_date, str) else issue_date
-        )
-        self.maturity_date = (
-            datetime.fromisoformat(maturity_date)
-            if isinstance(maturity_date, str) else maturity_date
-        )
+        super().__init__(notional=notional, issue_date=issue_date, maturity_date=maturity_date)
         self.index_curve = index_curve
         self.spread = spread
         self.day_count = day_count
