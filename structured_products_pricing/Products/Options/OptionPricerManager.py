@@ -20,3 +20,6 @@ class OptionPricerManager:
             return OptionPricerTree(self.Models_Params).compute_price()
         elif self.Pricer.pricer_name == "BS":
             return OptionPricerBS(self.Models_Params).compute_price()
+
+    def compute_autocall_probabilities(self, frequency: str):
+        return OptionPricerMC(self.Models_Params).compute_autocall_probabilities(frequency)

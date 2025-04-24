@@ -17,7 +17,7 @@ class Calendar:
         'yearly': 'YE',
     }
 
-    def __init__(self, start_date: str, end_date: str, frequency='yearly'):
+    def __init__(self, start_date: str, end_date: str, frequency=None):
         """
         Initialisation de la classe Calendar.
 
@@ -26,12 +26,6 @@ class Calendar:
         :param end_date: Date de fin au format 'YYYY-MM-DD'.
         :raises ValueError: Fréquence non supportée ou format de date incorrect.
         """
-        frequency = frequency.lower()
-        if frequency not in self.FREQUENCY_MAPPING:
-            raise ValueError(
-                f"Unsupported frequency '{frequency}'. Supported frequencies are: {list(self.FREQUENCY_MAPPING.keys())}"
-            )
-
         try:
             self.start_date = pd.to_datetime(start_date)
             self.end_date = pd.to_datetime(end_date)
@@ -42,8 +36,9 @@ class Calendar:
             raise ValueError("start_date must be earlier than end_date.")
 
         self.frequency = frequency
-        self.observation_dates = self._generate_observation_dates()
-        self.all_dates = self._generate_all_trading_dates()
+        if self.frequency is not None:
+            self.observation_dates = self._generate_observation_dates()
+            self.all_dates = self._generate_all_trading_dates()
 
     def _generate_observation_dates(self) -> set[datetime]:
         """
@@ -69,9 +64,11 @@ class Calendar:
     def year_fraction(start: datetime, end: datetime, convention: str) -> float:
         days = (end - start).days
         conv = convention.lower()
-        if conv == '30/360':
+        if conv == "30/360":
             d1, d2 = min(start.day, 30), min(end.day, 30)
             return ((end.year - start.year) * 360 + (end.month - start.month) * 30 + (d2 - d1)) / 360
-        if conv == 'act/360':
+        elif conv == "act/360":
             return days / 360
+        elif conv == "act/365":
+            return days/365
         return days / 365.25

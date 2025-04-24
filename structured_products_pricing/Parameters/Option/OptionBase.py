@@ -7,6 +7,7 @@ class OptionBase(ABC):
     Abstract class to handle option parameters.
     """
     def __init__(self, option_type: str, strike: float, maturity_date: datetime):
+        self.product: str = "Option"
         self.option_name: str = None
         self.option_type: str = option_type
         self.strike: float = strike

@@ -112,7 +112,7 @@ class OptionPricerMC(OptionPricerBase):
         # return np.array((price, std))
         return np.array(price)
 
-    def compute_maturity_probabilities(self):
+    def compute_autocall_probabilities(self, frequency: str):
         # Initialize the Brownian motion class
         brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps, self.Pricer.nb_draws,
                                                 self.Pricer.seed)
@@ -120,23 +120,24 @@ class OptionPricerMC(OptionPricerBase):
         brownian_paths: np.array = brownian_simulator.MotionVector()
         # Compute the simulated asset price at maturity
         S_t: np.array = self.compute_asset_price(brownian_paths, full_paths=True, use_incremental_method=True)
-        calendar = Calendar("monthly", self.Pricer.pricing_date, self.Option.maturity_date)
-        observation_dates = calendar.observation_dates
-        time_to_observation = [(observation - self.Pricer.pricing_date).days / 365 for observation in observation_dates]
-        observation_steps = [int(observation / self.dt) + 1 for observation in time_to_observation]
-        observation_steps[-1] = self.Pricer.nb_steps
+        # Set up calendar and observations
+        calendar = Calendar(self.Pricer.pricing_date, self.Option.maturity_date, frequency)
+        time_to_obs = [(observation - self.Pricer.pricing_date).days / 365 for observation in calendar.observation_dates]
+        obs_steps = [int(observation / self.dt) + 1 for observation in time_to_obs]
+        obs_steps[-1] = self.Pricer.nb_steps
+        # Calculate autocall probabilities
         already_breached = np.array([False] * len(S_t))
         autocall_prob = []
-        for step in observation_steps:
-            current_asset_price = S_t[:, step]
-            current_logic = np.logical_and(current_asset_price > 100, ~already_breached)
-            already_breached[current_logic] = True
-            autocall_prob.append(float(np.sum(current_logic) / len(S_t)))
-        # care quand on a juste une obs
+        for step in obs_steps:
+            prices = S_t[:, step]
+            new_breach = np.logical_and(prices > 100, ~already_breached)
+            already_breached[new_breach] = True
+            autocall_prob.append(float(np.sum(new_breach) / len(S_t)))
+        # Adjust final probability
         autocall_prob[-1] = round(1 - sum(autocall_prob), 3)
-        #print(autocall_prob)
-        #print(sorted(observation_dates))
-        return autocall_prob
+        # Compute duration
+        duration = np.dot(time_to_obs, autocall_prob)
+        return {"observation_dates": calendar.observation_dates, "autocall_prob": autocall_prob, "duration": duration}
 
     def price_LS(self) -> float:
         """
