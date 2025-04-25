@@ -8,6 +8,7 @@ from structured_products_pricing.Parameters.Pricer.PricerMC import PricerMC
 from structured_products_pricing.Parameters.Pricer.PricerTree import PricerTree
 from structured_products_pricing.Parameters.Bond.BondZC import ZeroCouponBond
 from structured_products_pricing.Products.Bond.RatePricerManager import RatePricerManager
+from structured_products_pricing.Rate.RateStochastic import RateStochastic
 from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredAutocall import \
     StrategyStructuredAutocall
 from structured_products_pricing.Utils.Calendar import Calendar
@@ -29,10 +30,9 @@ Pricer_Info = PricerMC(datetime(2024, 1, 1), 100, 40000, 1)
 #a = StrategyVanilla(Market_Info, Option_Info, Pricer_Info)
 #a = StrategyCertificateDiscount(Market_Info, Pricer_Info, 115, datetime(2025, 1, 1))
 #a = StrategyCertificateAirbag(Market_Info, Pricer_Info, 80, 120, datetime(2025, 1, 1))
-a = StrategyStructuredAutocall(Market_Info, Pricer_Info, 100, 80, 0.05, "yearly",
-                               datetime(2034, 1, 1))
-price = a.price()
-print(price)
+#a = StrategyStructuredAutocall(Market_Info, Pricer_Info, 100, 80, 0.05, "yearly",datetime(2034, 1, 1))
+#price = a.price()
+#print(price)
 #Option_Info = OptionBarrier("Call", 100, datetime(2025, 1, 1), "in", "up", 120, "European")
 #Params_Info = ModelParams(Market_Info, Option_Info, Pricer_Info)
 #a = StrategyVanilla([Params_Info], [1])
@@ -98,3 +98,8 @@ swap = InterestRateSwap(
 price = pricer.compute_price(swap, Market_Info)
 print(f"Prix Interest Rate Swap : {price:.4f}")
 '''
+
+rate_sto = RateStochastic(0.03, 0.5, 0.03, 0.01, 10)
+rate_sto.compute_stochastic_rates(10000,20)
+rate_sto.plot_rates()
+x = 3
