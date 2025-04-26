@@ -1,8 +1,7 @@
-﻿import numpy as np
-from sklearn.linear_model import LinearRegression
+﻿from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 from structured_products_pricing.Utils.Brownian import Brownian
-
+import numpy as np
 
 class RateStochastic:
     """

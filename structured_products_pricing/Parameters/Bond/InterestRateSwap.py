@@ -1,13 +1,10 @@
-# products/rate/InterestRateSwap.py
-from datetime import datetime
-from typing import Union, List
-from collections import defaultdict
-
 from structured_products_pricing.Parameters.Bond.BondBase import BondBase
 from structured_products_pricing.Parameters.Bond.CashFlow import CashFlow
 from structured_products_pricing.Parameters.Bond.BondFixedRate import FixedRateBond
 from structured_products_pricing.Parameters.Bond.BondFloatingRate import FloatingRateBond
-
+from collections import defaultdict
+from datetime import datetime
+from typing import Union, List
 
 class InterestRateSwap(BondBase):
     """

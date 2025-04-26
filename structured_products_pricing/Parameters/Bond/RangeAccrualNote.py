@@ -1,8 +1,8 @@
-from datetime import datetime
-from typing import Union, List
 from structured_products_pricing.Parameters.Bond.BondBase import BondBase
 from structured_products_pricing.Parameters.Bond.CashFlow import CashFlow
 from structured_products_pricing.Utils.Calendar import Calendar
+from typing import Union, List
+from datetime import datetime
 
 class RangeAccrualNote(BondBase):
     """

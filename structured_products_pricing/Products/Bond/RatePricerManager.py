@@ -1,10 +1,7 @@
+from structured_products_pricing.Parameters.Pricer.PricerBase import PricerBase
 from structured_products_pricing.Parameters.Bond.BondBase import BondBase
 from structured_products_pricing.Parameters.Market import Market
-from structured_products_pricing.Parameters.ModelParams import ModelParams
-from structured_products_pricing.Parameters.Pricer.DiscountingPricer import DiscountingPricer
-from structured_products_pricing.Parameters.Pricer.PricerBase import PricerBase
 from structured_products_pricing.Utils.Calendar import Calendar
-from datetime import datetime
 
 class RatePricerManager:
     """

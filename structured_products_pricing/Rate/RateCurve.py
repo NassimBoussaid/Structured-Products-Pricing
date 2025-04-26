@@ -1,11 +1,10 @@
-import os
-
-import numpy as np
-import pandas as pd
-from matplotlib import pyplot as plt
-from scipy.interpolate import interp1d
-from scipy.optimize import fmin
 from structured_products_pricing.Utils.Data import Data
+from scipy.interpolate import interp1d
+from matplotlib import pyplot as plt
+from scipy.optimize import fmin
+import pandas as pd
+import numpy as np
+import os
 
 def nelson_siegel(maturities, beta0, beta1, beta2, lambda1):
     """

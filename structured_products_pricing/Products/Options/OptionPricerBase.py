@@ -1,7 +1,7 @@
-from structured_products_pricing.Parameters.ModelParams import ModelParams
-from structured_products_pricing.Parameters.Market import Market
 from structured_products_pricing.Parameters.Option.OptionBase import OptionBase
 from structured_products_pricing.Parameters.Pricer.PricerBase import PricerBase
+from structured_products_pricing.Parameters.ModelParams import ModelParams
+from structured_products_pricing.Parameters.Market import Market
 from abc import ABC, abstractmethod
 import numpy as np
 
