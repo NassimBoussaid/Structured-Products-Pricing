@@ -1,5 +1,5 @@
 # Structured-Products-Pricing
-![Python](https://img.shields.io/badge/Python-3.10-blue)
+![Python](https://img.shields.io/badge/Python-%E2%89%A53.9-blue)
 ![Poetry](https://img.shields.io/badge/Package%20Manager-Poetry-5C2D91)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
