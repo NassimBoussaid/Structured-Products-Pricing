@@ -29,6 +29,7 @@ The system supports pricing vanilla options, certificates, bonds, and complex st
 
 - **Risk Metrics**:
   - Full computation of Greeks: Delta, Gamma, Vega, Theta, and Rho.
+  - Estimation of autocall probabilities.
 
 - **Model Calibration**:
   - Calibrate volatilities and risk-free rates directly from market data.
