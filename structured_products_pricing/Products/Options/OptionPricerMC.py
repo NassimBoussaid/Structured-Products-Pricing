@@ -97,7 +97,6 @@ class OptionPricerMC(OptionPricerBase):
         # Generate independent Brownian motion paths
         brownian_paths: np.array = brownian_simulator.MotionVector()
         # Compute the simulated asset price at maturity
-        S_T: np.array = self.compute_asset_price(brownian_paths, full_paths=True, use_incremental_method=True)
         if (self.Option.option_name == "Barrier" and self.Option.barrier_exercise == "American") or self.Option.option_name == "Asian":
             S_T: np.array = self.compute_asset_price(brownian_paths, full_paths=True, use_incremental_method=True)
         else:
@@ -112,7 +111,20 @@ class OptionPricerMC(OptionPricerBase):
         # return np.array((price, std))
         return np.array(price)
 
-    def compute_autocall_probabilities(self, frequency: str):
+    def compute_autocall_probabilities(self, autocall_barrier: float, frequency: str):
+        """
+        Computes the probabilities of an autocall event at each observation date based on Monte Carlo simulations.
+
+        Parameters:
+        - autocall_barrier: float. The barrier level triggering an autocall.
+        - frequency: str. Observation frequency ("monthly", "quarterly", etc.).
+
+        Returns:
+        - dict. Dictionary containing:
+            - "observation_dates": List of observation dates.
+            - "autocall_prob": List of autocall probabilities at each observation.
+            - "duration": Expected duration of the product (in years).
+        """
         # Initialize the Brownian motion class
         brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps, self.Pricer.nb_draws,
                                                 self.Pricer.seed)
@@ -123,20 +135,23 @@ class OptionPricerMC(OptionPricerBase):
         # Set up calendar and observations
         calendar = Calendar(self.Pricer.pricing_date, self.Option.maturity_date, frequency)
         time_to_obs = [(observation - self.Pricer.pricing_date).days / 365 for observation in calendar.observation_dates]
+        # Map each observation time to the corresponding time step index
         obs_steps = [int(observation / self.dt) + 1 for observation in time_to_obs]
         obs_steps[-1] = self.Pricer.nb_steps
-        # Calculate autocall probabilities
+        # Initialize breach tracking: tracks if a path already triggered an autocall
         already_breached = np.array([False] * len(S_t))
         autocall_prob = []
+        # Iterate over each observation step
         for step in obs_steps:
             prices = S_t[:, step]
-            new_breach = np.logical_and(prices > 100, ~already_breached)
+            new_breach = np.logical_and(prices > autocall_barrier, ~already_breached)
             already_breached[new_breach] = True
             autocall_prob.append(float(np.sum(new_breach) / len(S_t)))
-        # Adjust final probability
+        # Adjust the final autocall probability to ensure the total sums to 1
         autocall_prob[-1] = round(1 - sum(autocall_prob), 3)
-        # Compute duration
+        # Compute the expected duration as the weighted average of observation times
         duration = np.dot(time_to_obs, autocall_prob)
+
         return {"observation_dates": calendar.observation_dates, "autocall_prob": autocall_prob, "duration": duration}
 
     def price_LS(self) -> float:

@@ -1,8 +1,8 @@
+from structured_products_pricing.Products.Options.OptionPricerBase import OptionPricerBase
 from structured_products_pricing.Parameters.ModelParams import ModelParams
-import numpy as np
 from math import exp, sqrt, log
 from scipy.stats import norm
-from structured_products_pricing.Products.Options.OptionPricerBase import OptionPricerBase
+import numpy as np
 
 class OptionPricerBS(OptionPricerBase):
     """

@@ -4,9 +4,17 @@ from structured_products_pricing.Parameters.Pricer.PricerBase import PricerBase
 
 class ModelParams:
     """
-    A class to handle parameters (market, option, pricer).
+    Class to handle model parameters, combining Market, Option, and Pricer information.
     """
     def __init__(self, MarketObject: Market, OptionObject: OptionBase, PricerObject: PricerBase):
+        """
+        Initializes model parameters.
+
+        Parameters:
+        - MarketObject: Market. Object containing market data (spot, vol, rates, dividends).
+        - OptionObject: OptionBase. Object describing the option to be priced.
+        - PricerObject: PricerBase. Object describing the pricer setup (method and settings).
+        """
         self.Market: Market = MarketObject
         self.Option: OptionBase = OptionObject
         self.Pricer: PricerBase = PricerObject

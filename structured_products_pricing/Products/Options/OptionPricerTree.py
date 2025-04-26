@@ -1,9 +1,8 @@
-from structured_products_pricing.Products.Options.Node import Node
-from structured_products_pricing.Parameters.ModelParams import ModelParams
-from typing import Optional, List, Tuple
-import plotly.graph_objects as go
-from math import exp, sqrt
 from structured_products_pricing.Products.Options.OptionPricerBase import OptionPricerBase
+from structured_products_pricing.Parameters.ModelParams import ModelParams
+from structured_products_pricing.Products.Options.Node import Node
+from typing import Optional
+from math import exp, sqrt
 
 class OptionPricerTree(OptionPricerBase):
     """
