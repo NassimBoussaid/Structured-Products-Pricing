@@ -1,6 +1,5 @@
 import math
 
-
 class RateFlat:
     def __init__(self, rate: float):
         self.rate = rate
