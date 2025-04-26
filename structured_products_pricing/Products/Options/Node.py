@@ -1,6 +1,5 @@
-from math import exp
 from typing import Optional, Any
-
+from math import exp
 
 class Node:
     """

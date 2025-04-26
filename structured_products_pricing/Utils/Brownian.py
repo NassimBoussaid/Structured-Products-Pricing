@@ -1,6 +1,6 @@
-import numpy as np
 from scipy.stats import norm
 from typing import Optional
+import numpy as np
 
 class Brownian:
     """

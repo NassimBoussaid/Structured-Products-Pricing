@@ -1,10 +1,8 @@
 from datetime import datetime
 from typing import Union, List
-from structured_products_pricing.Products.Bond.BondBase import BondBase
-from structured_products_pricing.Products.Bond.CashFlow import CashFlow
-
+from structured_products_pricing.Parameters.Bond.BondBase import BondBase
+from structured_products_pricing.Parameters.Bond.CashFlow import CashFlow
 from structured_products_pricing.Utils.Calendar import Calendar
-
 
 class FixedRateBond(BondBase):
     def __init__(

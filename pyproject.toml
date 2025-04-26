@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "Strutured-Products-Pricing"
+version = "0.1.0"
+description = "This project aims to develop a scalable Python application for pricing a wide range of financial products."
+authors = ["Nassim Boussaid <nassim.boussaid@dauphine.eu>"]
+packages = [{ include = "structured_products_pricing" }]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.9.7 || >3.9.7"
+matplotlib = "^3.9.4"
+numpy = "^2.0.2"
+pandas = "^2.2.3"
+scikit-learn = "^1.6.1"
+scipy = "^1.13.1"
+streamlit = "^1.42.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

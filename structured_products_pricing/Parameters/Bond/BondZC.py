@@ -1,8 +1,7 @@
 from datetime import datetime
 from typing import Union, List
-from structured_products_pricing.Products.Bond.BondBase import BondBase
-from structured_products_pricing.Products.Bond.CashFlow import CashFlow
-
+from structured_products_pricing.Parameters.Bond.BondBase import BondBase
+from structured_products_pricing.Parameters.Bond.CashFlow import CashFlow
 
 class ZeroCouponBond(BondBase):
     def __init__(self, notional: float, issue_date: Union[str, datetime], maturity_date: Union[str, datetime]):
