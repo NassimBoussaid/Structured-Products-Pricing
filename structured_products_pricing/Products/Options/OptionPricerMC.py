@@ -33,7 +33,7 @@ class OptionPricerMC(OptionPricerBase):
         Returns:
         - S_t: np.array. Asset prices as an array.
         """
-        if self.Market.div_discrete > 0:
+        if self.Market.div_mode == "discrete":
             # Calculate the step on which the dividend occurs
             step_div = int(self.Market.time_to_div / self.dt) + 1
             # Compute the simulated asset price before the dividend step
@@ -91,6 +91,9 @@ class OptionPricerMC(OptionPricerBase):
         Returns:
         - price: np.array. Option price as a float.
         """
+        # Recompute time to maturity and time to dividend
+        self.Option.time_to_maturity = (self.Option.maturity_date - self.Pricer.pricing_date).days / 365
+        self.Market.time_to_div = (self.Market.div_date - self.Pricer.pricing_date).days / 365
         # Initialize the Brownian motion class
         brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps, self.Pricer.nb_draws,
                                                 self.Pricer.seed)

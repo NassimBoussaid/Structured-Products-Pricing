@@ -18,8 +18,8 @@ class StrategyOptionVanilla(StrategyBase):
         - PricerObject: PricerBase. Object describing the pricer setup (method and settings).
         """
         super().__init__(MarketObject, PricerObject)
-        self.strategy_name = "Vanilla"
         # Wrap the single option into an OptionPricerManager
         option_params = OptionPricerManager(self.Market, OptionObject, self.Pricer)
+        self.strategy_name = OptionObject.option_name
         self.products_params = [option_params]
         self.quantities = [1]

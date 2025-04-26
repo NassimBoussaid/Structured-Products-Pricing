@@ -9,6 +9,7 @@ from structured_products_pricing.Parameters.Pricer.PricerTree import PricerTree
 from structured_products_pricing.Parameters.Bond.BondZC import ZeroCouponBond
 from structured_products_pricing.Products.Bond.RatePricerManager import RatePricerManager
 from structured_products_pricing.Products.Options.OptionPricerManager import OptionPricerManager
+from structured_products_pricing.Strategies.StrategiesOption.StrategyOptionVanilla import StrategyOptionVanilla
 from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredAutocall import \
     StrategyStructuredAutocall
 from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredBarrierReverseConvertible import \
@@ -19,27 +20,36 @@ from structured_products_pricing.Utils.Calendar import Calendar
 from structured_products_pricing.Strategies.StrategiesOption.StrategyDigitalReplication import StrategyDigitalReplication
 
 #calendar = Calendar(start_date=datetime(2024, 1, 1), end_date=datetime(2024, 1, 1))
-Market_Info = Market(60, 0.2, 0.02, "Continuous",
+Market_Info = Market(100, 0.2, 0.02, "Continuous",
                      0.035, 0, datetime(2024, 6, 1))
-Pricer_Info = PricerMC(datetime(2024, 1, 1), 100, 40000, 1)
+Pricer_Info = PricerMC(datetime(2024, 1, 1), 10, 10000, 1)
 #Pricer_Info = PricerTree(datetime(2024, 10, 11), 500, "False", 1e-7)
 #a = StrategyStructuredReverseConvertible(Market_Info, Pricer_Info, 100, 0.105, datetime(2025, 1, 1))
 #a = StrategyStructuredBarrierReverseConvertible(Market_Info, Pricer_Info, 100, 80, 0.084, datetime(2025, 1, 1))
-#Option_Info = OptionEuropean("Call", 220, datetime(2024, 10, 18))
-#Bond_Info = ZeroCouponBond(1000000, datetime(2024, 1, 1), datetime(2026, 1, 1))
+#Option_Info = OptionEuropean("Call", 100, datetime(2026, 1, 1))
+#Bond_Info = ZeroCouponBond(1000000, datetime(2024, 1, 1), datetime(2025, 1, 1))
 #Pricer_Info = DiscountingPricer(datetime(2025, 1, 1))
 #cc = RatePricerManager(Market_Info, Bond_Info, Pricer_Info)
 #print(cc.compute_price())
-#Option_Info = OptionBarrier("Put", 200, datetime(2025, 1, 1), "in", "down", 160, "American")
+#Option_Info = OptionBarrier("Put", 100, datetime(2025, 1, 1), "in", "down", 80, "American")
 #b = OptionPricerManager(Market_Info, Option_Info, Pricer_Info)
-#a = StrategyDigitalReplication(Market_Info, Pricer_Info, "Call", 180, 0.01, datetime(2024, 1, 31), 1)
-#a = StrategyVanilla(Market_Info, Option_Info, Pricer_Info)
+a = StrategyDigitalReplication(Market_Info, Pricer_Info, "Call", 100, 0.2, datetime(2025, 1, 1), 1)
+#a = StrategyOptionVanilla(Market_Info, Option_Info, Pricer_Info)
 #a = StrategyCertificateDiscount(Market_Info, Pricer_Info, 115, datetime(2025, 1, 1))
 #a = StrategyCertificateAirbag(Market_Info, Pricer_Info, 80, 120, datetime(2025, 1, 1))
-a = StrategyStructuredAutocall(Market_Info, Pricer_Info, 100, 80, 100, 100, 0.01, "monthly", datetime(2025, 1, 1))
+#a = StrategyStructuredAutocall(Market_Info, Pricer_Info, 100, 80, 100, 100, 0.01, "monthly", datetime(2025, 1, 1))
 #a = StrategyStructuredBarrierReverseConvertible(Market_Info, Pricer_Info, 80, 80, 0.1, datetime(2025, 1, 1))
-price = a.price()
+price = a.greeks_over_spot_range(True)
 print(price)
+import matplotlib.pyplot as plt
+# Plot Delta
+plt.plot(price["Spot"], price["Payoff"])
+plt.xlabel("Spot Price")
+plt.ylabel("Price")
+plt.title("Delta vs Spot Price")
+plt.grid(True)
+plt.show()
+
 #price = b.compute_price()
 #print(price)
 #Option_Info = OptionBarrier("Call", 100, datetime(2025, 1, 1), "in", "up", 120, "European")
