@@ -2,6 +2,7 @@ from structured_products_pricing.Parameters.Pricer.PricerBase import PricerBase
 from structured_products_pricing.Parameters.Bond.BondBase import BondBase
 from structured_products_pricing.Parameters.Market import Market
 from structured_products_pricing.Utils.Calendar import Calendar
+import math
 
 class RatePricerManager:
     """
@@ -46,7 +47,7 @@ class RatePricerManager:
         dirty = 0.0
         for cf in self.Product.get_cashflows():
             t = calendar.year_fraction(self.Pricer.pricing_date, cf.date, self.Pricer.day_count)
-            df = self.Market.discount_curve.discount_factor(t)
+            df = math.exp(-self.Market.int_rate * t)
             dirty += cf.amount * df
 
         if clean and hasattr(self.Product, 'calendar'):
