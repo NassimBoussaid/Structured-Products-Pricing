@@ -1,10 +1,24 @@
 ﻿import numpy as np
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
+from structured_products_pricing.Utils.Brownian import Brownian
 
 
 class RateStochastic:
+    """
+    Class to generate stochastic rates
+    """
     def __init__(self, r0, a, b, sigma, T):
+        """
+        Initialize model parameters.
+
+        Parameters:
+        - r0: float. Initial short rate.
+        - a: float. Speed of mean reversion.
+        - b: float. Long-term mean level.
+        - sigma: float. Volatility parameter.
+        - T: float. Maturity time horizon.
+        """
         self.r0 = r0
         self.a = a
         self.b = b
@@ -13,16 +27,33 @@ class RateStochastic:
         self.rates = None
 
     def cir(self, num_steps, num_paths, dt):
+        """
+        Simulates interest rate paths using the Cox-Ingersoll-Ross (CIR) process.
+
+        Parameters:
+        - num_steps: int. Number of time steps.
+        - num_paths: int. Number of simulation paths.
+        - dt: float. Size of each time step.
+        """
         self.rates = np.zeros((num_steps + 1, num_paths))
         self.rates[0] = self.r0
-        dW = np.random.normal(0, 1, (num_steps, num_paths))
+        brownian = Brownian(self.T, num_steps, num_paths)
+        motion = brownian.MotionVector()
+        increments = np.diff(motion, axis=1)
+
         for t in range(1, num_steps + 1):
             sqrt_r = np.sqrt(np.maximum(self.rates[t - 1], 0))
             self.rates[t] = self.rates[t - 1] + self.a * (self.b - self.rates[t - 1]) * dt + \
-                            self.sigma * sqrt_r * np.sqrt(dt) * dW[t - 1]
+                            self.sigma * sqrt_r * increments[:,t-1]
             self.rates[t] = np.maximum(self.rates[t], 0)
 
     def calibrate_LS(self, dt):
+        """
+        Calibrates the CIR model parameters using Least Squares regression on one simulated path.
+
+        Parameters:
+        - dt: float. Size of each time step used in the simulation.
+        """
         r0 = self.rates[:-1, 0].reshape(-1, 1)
         r1 = self.rates[1:, 0]
         reg = LinearRegression().fit(r0, r1)
@@ -39,12 +70,22 @@ class RateStochastic:
         self.sigma = sigma_LS
 
     def compute_stochastic_rates(self, num_steps, num_paths):
+        """
+        Computes stochastic rate paths with recalibration of CIR parameters.
+
+        Parameters:
+        - num_steps: int. Number of time steps.
+        - num_paths: int. Number of simulation paths after calibration.
+        """
         dt = self.T / num_steps
         self.cir(num_steps, 1, dt)
         self.calibrate_LS(dt)
         self.cir(num_steps, num_paths, dt)
 
     def plot_rates(self):
+        """
+        Plots a subset of the simulated stochastic rate paths.
+        """
         if self.rates is None:
             print("No rates computed")
             return

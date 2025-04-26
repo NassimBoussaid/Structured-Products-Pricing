@@ -9,6 +9,7 @@ from structured_products_pricing.Parameters.Pricer.PricerTree import PricerTree
 from structured_products_pricing.Parameters.Bond.BondZC import ZeroCouponBond
 from structured_products_pricing.Products.Bond.RatePricerManager import RatePricerManager
 from structured_products_pricing.Products.Options.OptionPricerManager import OptionPricerManager
+from structured_products_pricing.Rate.RateStochastic import RateStochastic
 from structured_products_pricing.Strategies.StrategiesOption.StrategyOptionVanilla import StrategyOptionVanilla
 from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredAutocall import \
     StrategyStructuredAutocall
@@ -33,22 +34,22 @@ Pricer_Info = PricerMC(datetime(2024, 1, 1), 10, 10000, 1)
 #print(cc.compute_price())
 #Option_Info = OptionBarrier("Put", 100, datetime(2025, 1, 1), "in", "down", 80, "American")
 #b = OptionPricerManager(Market_Info, Option_Info, Pricer_Info)
-a = StrategyDigitalReplication(Market_Info, Pricer_Info, "Call", 100, 0.2, datetime(2025, 1, 1), 1)
+#a = StrategyDigitalReplication(Market_Info, Pricer_Info, "Call", 100, 0.2, datetime(2025, 1, 1), 1)
 #a = StrategyOptionVanilla(Market_Info, Option_Info, Pricer_Info)
 #a = StrategyCertificateDiscount(Market_Info, Pricer_Info, 115, datetime(2025, 1, 1))
 #a = StrategyCertificateAirbag(Market_Info, Pricer_Info, 80, 120, datetime(2025, 1, 1))
 #a = StrategyStructuredAutocall(Market_Info, Pricer_Info, 100, 80, 100, 100, 0.01, "monthly", datetime(2025, 1, 1))
 #a = StrategyStructuredBarrierReverseConvertible(Market_Info, Pricer_Info, 80, 80, 0.1, datetime(2025, 1, 1))
-price = a.greeks_over_spot_range(True)
-print(price)
-import matplotlib.pyplot as plt
+#price = a.greeks_over_spot_range(True)
+#print(price)
+#import matplotlib.pyplot as plt
 # Plot Delta
-plt.plot(price["Spot"], price["Payoff"])
-plt.xlabel("Spot Price")
-plt.ylabel("Price")
-plt.title("Delta vs Spot Price")
-plt.grid(True)
-plt.show()
+#plt.plot(price["Spot"], price["Payoff"])
+#plt.xlabel("Spot Price")
+#plt.ylabel("Price")
+#plt.title("Delta vs Spot Price")
+#plt.grid(True)
+#plt.show()
 
 #price = b.compute_price()
 #print(price)
@@ -117,3 +118,7 @@ swap = InterestRateSwap(
 price = pricer.compute_price(swap, Market_Info)
 print(f"Prix Interest Rate Swap : {price:.4f}")
 '''
+
+sto_rates = RateStochastic(0.03,0.5,0.03,0.07,10)
+sto_rates.compute_stochastic_rates(1000,10)
+sto_rates.plot_rates()
