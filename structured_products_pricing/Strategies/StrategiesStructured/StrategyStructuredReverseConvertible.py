@@ -1,6 +1,5 @@
 from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredBase import StrategyStructuredBase
 from structured_products_pricing.Products.Options.OptionPricerManager import OptionPricerManager
-from structured_products_pricing.Parameters.Pricer.DiscountingPricer import DiscountingPricer
 from structured_products_pricing.Products.Bond.RatePricerManager import RatePricerManager
 from structured_products_pricing.Parameters.Option.OptionEuropean import OptionEuropean
 from structured_products_pricing.Parameters.Pricer.PricerBase import PricerBase
@@ -28,7 +27,7 @@ class StrategyStructuredReverseConvertible(StrategyStructuredBase):
         self.strategy_name = "Reverse Convertible"
         # Define the zero-coupon bond paying back nominal plus coupon
         bond_zc = ZeroCouponBond(100 * (1 + coupon_level), self.Pricer.pricing_date, maturity_date)
-        bond_zc_params = RatePricerManager(self.Market, bond_zc, DiscountingPricer(self.Pricer.pricing_date))
+        bond_zc_params = RatePricerManager(self.Market, bond_zc, self.Pricer.pricing_date)
         # Define the put option
         option = OptionEuropean("Put", strike, maturity_date)
         option_params = OptionPricerManager(self.Market, option, self.Pricer)

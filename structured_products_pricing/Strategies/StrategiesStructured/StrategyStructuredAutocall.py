@@ -1,7 +1,6 @@
 from structured_products_pricing.Strategies.StrategiesOption.StrategyDigitalReplication import StrategyDigitalReplication
 from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredBase import StrategyStructuredBase
 from structured_products_pricing.Products.Options.OptionPricerManager import OptionPricerManager
-from structured_products_pricing.Parameters.Pricer.DiscountingPricer import DiscountingPricer
 from structured_products_pricing.Products.Bond.RatePricerManager import RatePricerManager
 from structured_products_pricing.Parameters.Option.OptionBarrier import OptionBarrier
 from structured_products_pricing.Parameters.Pricer.PricerBase import PricerBase
@@ -48,7 +47,7 @@ class StrategyStructuredAutocall(StrategyStructuredBase):
         self.quantities = [-1/strike_pdi * 100]
         # Add a Zero-Coupon Bond to match the expected autocall date
         bond_zc = ZeroCouponBond(100, self.Pricer.pricing_date, self.Pricer.pricing_date + timedelta(days=365*autocall_params["duration"]))
-        bond_zc_params = RatePricerManager(self.Market, bond_zc, DiscountingPricer(self.Pricer.pricing_date))
+        bond_zc_params = RatePricerManager(self.Market, bond_zc, self.Pricer.pricing_date)
         self.products_params += [bond_zc_params]
         self.quantities += [1]
         # Add the digital coupons at each observation date
