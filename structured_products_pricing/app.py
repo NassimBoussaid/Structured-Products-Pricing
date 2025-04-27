@@ -1,7 +1,6 @@
 import streamlit as st
 import importlib
 
-
 # GLOBAL CONFIG
 st.set_page_config(
     page_title="Exotic Option Pricers",
@@ -9,6 +8,18 @@ st.set_page_config(
     layout="wide",
 )
 
+# CLEAN SESSION STATE FUNCTION
+def clear_pricing_session():
+    pricing_keys = [
+        "strategy", "price", "greeks", "greeks_spot_range",
+        "show_greeks", "show_graphs",
+        "priced_product_choice", "priced_strategy_type", "priced_cp_type",
+        "priced_barrier_type", "priced_certificate_type", "priced_option_type",
+        "priced_pricer_choice"
+    ]
+    for key in pricing_keys:
+        if key in st.session_state:
+            del st.session_state[key]
 
 # PAGE DEFINITIONS
 PAGES = {
@@ -18,30 +29,21 @@ PAGES = {
     "Barrier Options":    "views.barrier_option",
     "Certificates":       "views.certificate",
     "Structured Products": "views.structured_products",
-
 }
 
-
 # CURRENT STATE
-
 if "active_page" not in st.session_state:
     st.session_state["active_page"] = "Home"
 active_page = st.session_state["active_page"]
 
-
 # NAVIGATION HELPER
-
 def go_to(page_key: str) -> None:
-    """Change la page active dans session_state."""
-    st.session_state["active_page"] = page_key    # pas de st.rerun()
+    st.session_state["active_page"] = page_key
     st.rerun()
 
-
 # SIDEBAR
-
 with st.sidebar:
     st.title("Navigation")
-
     radio_key = f"nav_{active_page}"
     choice = st.radio(
         "Pages :",
@@ -52,12 +54,12 @@ with st.sidebar:
     )
 
 if choice != active_page:
+    clear_pricing_session()
     st.session_state["active_page"] = choice
-    active_page = choice                          # on met à jour la variable locale
-
+    active_page = choice
+    st.rerun()
 
 # HOME PAGE
-
 if active_page == "Home":
     st.markdown(
         """
@@ -72,22 +74,22 @@ if active_page == "Home":
     cards = [
         {"title": "Classic Options",
          "subtitle": ["European options", "American options", "Digital options"],
-         "icon": "🍋", "key": "Classic Options"},
+         "key": "Classic Options"},
         {"title": "Option Strategies",
-         "subtitle": ["Vertical Spreads", "Straddles & Strangles", "Flies & Condors"],
-         "icon": "🌶️", "key": "Option Strategies"},
+         "subtitle": ["Vertical Spreads", "Straddles & Strangles", "Butterfly & Condors"],
+         "key": "Option Strategies"},
         {"title": "Asian Options",
          "subtitle": ["Asian Calls", "Asian Puts"],
-         "icon": "🍵", "key": "Asian Options"},
+         "key": "Asian Options"},
         {"title": "Barrier Options",
          "subtitle": ["Knock-In Options", "Knock-Out Options"],
-         "icon": "🍒", "key": "Barrier Options"},
+         "key": "Barrier Options"},
         {"title": "Certificates",
          "subtitle": ["Bonus", "Airbag", "Twin-Win…"],
-         "icon": "🍍", "key": "Certificates"},
-        {"title": "Structured Products",  #
+         "key": "Certificates"},
+        {"title": "Structured Products",
          "subtitle": ["Reverse Convertibles", "Autocalls", "Barrier Reverse Convertibles"],
-         "icon": "🍇", "key": "Structured Products"},
+         "key": "Structured Products"},
     ]
 
     for row in range(0, len(cards), 3):
@@ -115,15 +117,10 @@ if active_page == "Home":
                     args=(card["key"],),
                 )
 
-
-
 # FUNCTIONAL PAGES
-
 else:
     if st.button("← Back to catalog"):
         go_to("Home")
 
-
     module = importlib.import_module(PAGES[active_page])
     module.run()
-
