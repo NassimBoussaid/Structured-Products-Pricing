@@ -21,9 +21,15 @@ def run():
 
         st.subheader("Market Parameters")
         stock_price = st.number_input("Stock price:", min_value=0.0, value=100.0)
-        volatility = st.number_input("Volatility:", min_value=0.0, value=0.2)
-        interest_rt = st.number_input("Interest rate:", min_value=0.0, value=0.02)
         dividend_yld = st.number_input("Dividend yield:", min_value=0.0, value=0.035)
+        volatility = st.number_input("Volatility:", min_value=0.0, value=0.2)
+
+        rate_mode = st.selectbox("Rate Mode:", ["Constant", "Rate Curve", "Stochastic Rate"])
+        if rate_mode == "Constant":
+            interest_rt = st.number_input("Interest rate:", value=0.02)
+        else:
+            interest_rt = 0.02
+
 
         st.subheader("Product Parameters")
         if product_choice == "Barrier Reverse Convertible":
@@ -69,6 +75,7 @@ def run():
                 market = Market(
                     underlying_price=stock_price,
                     volatility=volatility,
+                    rate_mode=rate_mode,
                     interest_rate=interest_rt,
                     div_mode="Continuous",
                     dividend_rate=dividend_yld,
