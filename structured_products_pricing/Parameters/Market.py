@@ -19,6 +19,7 @@ class Market:
         Parameters:
         - underlying_price: float. Current spot price of the underlying asset.
         - volatility: float. Volatility of the underlying asset.
+        - rate_mode:str. 'stochastic rate' or 'curve rate' or 'constant' mode.
         - interest_rate: float. Risk-free interest rate.
         - div_mode: str. Dividend mode, either "continuous" or "discrete".
         - dividend_rate: float. Continuous dividend yield (if applicable).

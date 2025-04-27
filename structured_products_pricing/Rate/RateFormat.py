@@ -9,7 +9,7 @@ def get_stochastic_rates(interest_rate: float, time_to_maturity: float, nb_steps
     """
     Generate stochastic interest rate paths and their associated discount factors.
 
-    Args:
+    Parameters:
         interest_rate (float): Initial interest rate at time t=0.
         time_to_maturity (float): Total time horizon (in years).
         nb_steps (int): Number of time steps.
@@ -40,17 +40,22 @@ def get_deterministic_rates(interest_rate: float,
                             time_to_maturity: float,
                             pricer: Pricer):
     """
-    Generate deterministic rate paths and cumulative discount factors.
+    Generate deterministic interest rate paths and cumulative discount factors.
 
-    Args:
+    Depending on the pricer type ('Tree' vs others), either returns:
+    - Only rates for tree-based models,
+    - Or full broadcasted rates paths and discount factors for Monte Carlo / deterministic simulations.
+
+    Parameters:
+        interest_rate (float): Initial constant rate if 'constant' rate_mode is selected.
+        rate_mode (str): Either 'constant', 'rate curve' or 'stochastic rate'
         time_to_maturity (float): Total time horizon (in years).
-        nb_steps (int): Number of time steps.
-        nb_draws (int): Number of Monte Carlo draws (paths).
+        pricer (Pricer): Pricer object containing pricer_name, nb_steps, and nb_draws attributes.
 
     Returns:
-        rates (np.ndarray): Zero-coupon rates at each grid time, shape (nb_steps + 1,).
-        rates_path (np.ndarray): Broadcasted rates across all paths, shape (nb_draws, nb_steps + 1).
-        df (np.ndarray): Discount factors cumulative for each path, shape (nb_draws, nb_steps + 1).
+        rates (np.ndarray): Zero-coupon rates
+        rates_path (np.ndarray or None): Broadcasted rates across all paths (only for non-tree pricers).
+        df (np.ndarray or None): Cumulative discount factors across paths (only for non-tree pricers).
     """
     if rate_mode.lower() == 'constant':
         rate_curve = RateFlat(rate=interest_rate)
@@ -87,21 +92,22 @@ def generate_rates_paths(mode: str,
                          pricer: Pricer,
                          interest_rate: float = None):
     """
-    Dispatch function to generate rates, rates_path, and discount factors
-    depending on the chosen mode ('stochastic' or 'deterministic').
+    Dispatch function to generate rates, rates_path, and discount factors depending on the mode.
 
-    Args:
-        mode (str): 'stochastic' or 'deterministic'.
-        rate_curve (object): Object with .get_yield(t) method (for deterministic mode).
-        time_to_maturity (float): Total time horizon.
-        nb_steps (int): Number of steps.
-        nb_draws (int): Number of paths.
-        interest_rate (float, optional): Initial rate (required if mode is 'stochastic').
+    Depending on the mode ('stochastic rate' or deterministic), the function:
+    - Calls stochastic rate generation using CIR model if mode is 'stochastic rate'.
+    - Calls deterministic generation from a flat or fitted yield curve otherwise.
+
+    Parameters:
+        mode (str): 'stochastic rate' or 'curve rate' or 'constant' mode.
+        time_to_maturity (float): Total time horizon (in years).
+        pricer (Pricer): Pricer object containing nb_steps, nb_draws, and pricer_name attributes.
+        interest_rate (float, optional): Initial interest rate. Mandatory if mode is 'stochastic rate'.
 
     Returns:
-        rates (np.ndarray or None): Zero-coupon rates if deterministic, None if stochastic.
-        rates_path (np.ndarray): Path of simulated or deterministic rates.
-        df (np.ndarray): Discount factors associated with rates_path.
+        rates (np.ndarray or None): Zero-coupon rates (for deterministic mode) or None (for stochastic mode).
+        rates_path (np.ndarray): Simulated or broadcasted rates across all paths.
+        df (np.ndarray): Corresponding cumulative discount factors across time steps and paths.
     """
     mode = mode.lower()
 

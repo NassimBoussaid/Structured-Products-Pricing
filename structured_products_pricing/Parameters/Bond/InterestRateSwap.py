@@ -8,18 +8,18 @@ from typing import Union, List
 
 class InterestRateSwap(BondBase):
     """
-    Interest Rate Swap (IRS) combinant une patte fixe et une patte flottante.
+    Interest Rate Swap (IRS) class.
 
-    La patte fixe est payée (montants négatifs), la patte flottante est reçue (montants positifs).
+    Represents a vanilla IRS combining a fixed leg (payer) and a floating leg (receiver).
 
-    :param notional: montant du nominal
-    :param issue_date: date d'initiation du swap
-    :param maturity_date: date d'échéance du swap
-    :param fixed_rate: taux fixe payé périodiquement
-    :param index_curve: courbe d'index pour la patte flottante
-    :param spread: marge ajoutée au taux index pour la patte flottante
-    :param frequency: fréquence des paiements pour les deux pattes
-    :param day_count: convention day count pour accrual
+    Parameters:
+        notional (float): Swap notional amount.
+        issue_date (str or datetime): Swap start date.
+        maturity_date (str or datetime): Swap maturity date.
+        fixed_rate (float): Fixed rate paid periodically.
+        spread (float, optional): Spread added to the floating index rate. Defaults to 0.0.
+        frequency (str, optional): Payment frequency for both legs. Defaults to 'yearly'.
+        day_count (str, optional): Day count convention. Defaults to 'act/365.25'.
     """
 
     def __init__(

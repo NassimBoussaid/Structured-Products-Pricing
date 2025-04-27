@@ -16,10 +16,23 @@ class OptionPricerBase(ABC):
 
     def __init__(self, model_params: ModelParams):
         """
-        Initializes an OptionPricerBase.
+        Initializes the base setup for any option pricer.
+
+        This class stores the aggregated market, option, and pricer parameters,
+        and precomputes additional objects needed for pricing models.
 
         Parameters:
-        - model_params: ModelParams. Aggregated market, option, and pricer parameters.
+            model_params (ModelParams): Object aggregating:Market (Market), Option (OptionBase), Pricer (PricerBase)
+
+
+        Attributes Initialized:
+            self.Market (Market): Market data object.
+            self.Option (OptionBase): Option or rate product object.
+            self.Pricer (PricerBase): Pricer settings object.
+            self.dt (float): Time increment (time_to_maturity divided by number of steps), only for MC or Tree.
+            self.rates (np.ndarray or None): Discrete spot rates at each time step (for deterministic pricers).
+            self.rates_path (np.ndarray or None): Broadcasted spot rate paths across simulations.
+            self.df (np.ndarray or None): Discount factors associated to each time step and path.
         """
         self.Market: Market = model_params.Market
         self.Option: OptionBase = model_params.Option

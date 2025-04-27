@@ -8,10 +8,20 @@ import datetime as datetime
 
 class RatePricerManager:
     """
-        Pricer par actualisation pour tous les produits de taux.
-        Hérite de DiscountingPricer pour récupérer :
-          - self.pricing_date
-          - self.day_count
+    Rate Pricer Manager class.
+    Handles pricing and accrued interest calculation for fixed or floating rate products
+    using simple discounting based on a constant interest rate.
+
+    Parameters:
+        MarketObject (Market): Market environment containing the interest rate.
+        BondObject (BondBase): FixedRateBond, FloatingRateBond, or similar rate product.
+        pricing_date (datetime): Date at which pricing is performed.
+
+    Methods:
+        accrued_interest() -> float:
+            Estimates accrued interest from the last coupon date to the pricing date.
+        compute_price(clean: bool = False) -> float:
+            Computes the discounted price (dirty or clean) of the bond.
     """
 
     def __init__(self, MarketObject: Market, BondObject: BondBase, pricing_date: datetime):
@@ -20,13 +30,7 @@ class RatePricerManager:
         self.pricing_date = pricing_date
 
     def accrued_interest(self) -> float:
-        """
-        Estime les intérêts courus pour Fixed ou Floating Rate Bond.
-        Nécessite que le produit ait :
-         - product.calendar
-         - product.day_count
-         - coupon_rate ou index_curve + spread
-        """
+
         past = [d for d in self.Product.calendar.observation_dates if d <= self.pricing_date]
         if not past:
             return 0.0

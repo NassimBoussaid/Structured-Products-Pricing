@@ -5,20 +5,29 @@ from structured_products_pricing.Parameters.Bond.CashFlow import CashFlow
 from structured_products_pricing.Rate.RateCurve import RateCurve
 from structured_products_pricing.Utils.Calendar import Calendar
 
+
 class FloatingRateBond(BondBase):
     """
-    Obligation à taux variable (Floating Rate Bond).
+    Floating Rate Bond class.
 
-    :param notional: montant nominal
-    :param issue_date: date d'émission
-    :param maturity_date: date d'échéance
-    :param index_curve: objet RateCurve ou RateFlat pour calculer les taux d'intérêt futurs
-    :param spread: marge additive au-dessus de l'index
-    :param frequency: fréquence des coupons ('annual', 'semiannual', etc.)
-    :param day_count: convention de day count pour accrual ('30/360', 'act/360', 'act/365.25')
-    :param calendar_region: région pour le calendrier de trading
-    :param business_day_convention: convention de jour ouvré
-    :param end_of_month: utiliser dropdown EOM
+    Represents a bond whose coupon payments are linked to a floating interest rate index plus a fixed spread.
+
+    Parameters:
+        notional (float): Bond principal amount.
+        issue_date (str or datetime): Bond issuance date.
+        maturity_date (str or datetime): Bond maturity date.
+        spread (float, optional): Fixed spread added to the index rate. Defaults to 0.0.
+        frequency (str, optional): Coupon payment frequency ('annual', 'semiannual', etc.). Defaults to 'yearly'.
+        day_count (str, optional): Day count convention ('30/360', 'act/360', 'act/365.25'). Defaults to 'act/365.25'.
+
+    Attributes:
+        index_curve (RateCurve): Curve used to determine the floating rate at each payment date.
+        calendar (Calendar): Calendar managing observation dates and business day adjustments.
+
+    Methods:
+        get_cashflows() -> List[CashFlow]:
+            Generates future cashflows including coupons and principal repayment,
+            based on the floating index curve and spread.
     """
 
     def __init__(
