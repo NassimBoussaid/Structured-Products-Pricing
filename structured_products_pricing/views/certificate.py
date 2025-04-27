@@ -48,8 +48,15 @@ def run():
         st.subheader("Market Parameters")
         stock_price = st.number_input("Stock price :", value=100.0)
         dividend_yield = st.number_input("Dividend yield :", value=0.035)
-        interest_rate = st.number_input("Interest rate :", value=0.02)
         volatility = st.number_input("Volatility:", min_value=0.0, value=0.2)
+
+        rate_mode = st.selectbox("Rate Mode:", ["Constant", "Rate Curve", "Stochastic Rate"])
+        if rate_mode == "Constant":
+            interest_rate = st.number_input("Interest rate:", value=0.02)
+        else:
+            interest_rate = 0.02
+
+
 
         st.subheader("Dates")
         maturity_date = st.date_input("Maturity date:", value=datetime(2025, 1, 1))
@@ -75,7 +82,7 @@ def run():
                 dividend_date_obj = datetime.combine(dividend_date, datetime.min.time())
                 maturity_date_obj = datetime.combine(maturity_date, datetime.min.time())
 
-                market = Market(stock_price, volatility, interest_rate, "Continuous", dividend_yield, 0, dividend_date_obj)
+                market = Market(stock_price, volatility,rate_mode, interest_rate, "Continuous", dividend_yield, 0, dividend_date_obj)
                 pricer = PricerMC(pricing_date_obj, n_steps, n_draws, seed)
 
                 strategy = None
