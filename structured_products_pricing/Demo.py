@@ -1,9 +1,6 @@
-from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredBarrierReverseConvertible import \
-    StrategyStructuredBarrierReverseConvertible
-from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredAutocall import \
-    StrategyStructuredAutocall
-from structured_products_pricing.Strategies.StrategiesOption.StrategyDigitalReplication import \
-    StrategyDigitalReplication
+from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredBarrierReverseConvertible import StrategyStructuredBarrierReverseConvertible
+from structured_products_pricing.Strategies.StrategiesStructured.StrategyStructuredAutocall import StrategyStructuredAutocall
+from structured_products_pricing.Strategies.StrategiesOption.StrategyDigitalReplication import StrategyDigitalReplication
 from structured_products_pricing.Strategies.StrategiesOption.StrategyOptionVanilla import StrategyOptionVanilla
 from structured_products_pricing.Strategies.StrategiesOption.StrategyStraddle import StrategyStraddle
 from structured_products_pricing.Parameters.Option.OptionAmerican import OptionAmerican
@@ -15,12 +12,10 @@ from structured_products_pricing.Parameters.Pricer.PricerMC import PricerMC
 from structured_products_pricing.Parameters.Market import Market
 from datetime import datetime
 
-
 class PricerClient:
     """
     A client to set up market, pricer, and strategy for structured product pricing.
     """
-
     def __init__(self):
         self.market = None
         self.pricer_mc = None
@@ -32,10 +27,10 @@ class PricerClient:
         print("Setting up the Market...")
         self.market = Market(
             underlying_price=100,
-            volatility=0.20,
             vol_mode="constant",
-            interest_rate=0.02,
+            volatility=0.20,
             rate_mode="constant",
+            interest_rate=0.02,
             div_mode="Continuous",
             dividend_rate=0.035,
             dividend_discrete=0.00,
@@ -48,7 +43,7 @@ class PricerClient:
         self.pricer_mc = PricerMC(
             pricing_date=datetime(2025, 1, 1),
             nb_steps=50,
-            nb_draws=1000,
+            nb_draws=100000,
             seed=1
         )
         print("✅ Pricer ready.\n")
@@ -75,13 +70,6 @@ class PricerClient:
             MarketObject=self.market,
             OptionObject=OptionEuropean("Call", 100, datetime(2026, 1, 1)),
             PricerObject=self.pricer_mc,
-        )
-
-    def setup_strategy_1_bs(self):
-        self.strategy = StrategyOptionVanilla(
-            MarketObject=self.market,
-            OptionObject=OptionEuropean("Call", 100, datetime(2026, 1, 1)),
-            PricerObject=self.pricer_bs,
         )
 
     def setup_strategy_2(self):
@@ -152,13 +140,10 @@ class PricerClient:
         greeks = self.strategy.greeks()
         print(f"✅ Computed greeks (Delta, Gamma, Vega, Theta, Rho): {greeks}\n")
 
-
 def main():
     client = PricerClient()
     client.setup_market()
     client.setup_pricer_mc()
-    client.setup_pricer_bs()
-
     client.setup_strategy_1()
     client.run_pricing()
     client.run_greeks_analysis()
@@ -172,11 +157,8 @@ def main():
     client.run_pricing()
     client.setup_strategy_6()
     client.run_pricing()
-
     client.setup_strategy_7()
-    client.run_pricing() 
-
-
+    client.run_pricing()
 
 if __name__ == "__main__":
     main()
