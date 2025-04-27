@@ -35,7 +35,6 @@ class ImpliedVolatility(Volatility):
         self.second_guess = 0.45
         self.volatility_surface = None
 
-
     def initialize_surface(self,market: Market, pricer: PricerBase):
         """
         Initializes the volatility surface by computing implied volatilities.
@@ -195,5 +194,3 @@ class ImpliedVolatility(Volatility):
         fig.colorbar(surf, shrink=0.5, aspect=10)
         plt.tight_layout()
         plt.show()
-
-

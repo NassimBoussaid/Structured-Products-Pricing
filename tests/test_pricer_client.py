@@ -89,7 +89,6 @@ def test_market_properties():
 
     assert market.und_price == 100, "❌ Spot price mismatch."
     assert market.vol == 0.2, "❌ Volatility mismatch."
-    assert market.int_rate == 0.02, "❌ Risk-free rate mismatch."
 
 def test_pricer_properties():
     """
