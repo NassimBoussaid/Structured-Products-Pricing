@@ -85,7 +85,7 @@ def test_market_properties():
     """
     Test that Market initializes with correct properties.
     """
-    market = Market(100, 0.2, 0.02, "Continuous", 0.035, 0, datetime(2024, 6, 1))
+    market = Market(100, 0.2, "constant", 0.02, "Continuous", 0.035, 0, datetime(2024, 6, 1))
 
     assert market.und_price == 100, "❌ Spot price mismatch."
     assert market.vol == 0.2, "❌ Volatility mismatch."
