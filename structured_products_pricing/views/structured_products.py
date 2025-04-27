@@ -57,7 +57,7 @@ def run():
 
         st.subheader("Monte Carlo Parameters")
         n_steps = st.number_input("Number of time steps:", min_value=1, value=50)
-        n_draws = st.number_input("Number of paths:", min_value=1000, value=20000, step=1000)
+        n_draws = st.number_input("Number of paths:", min_value=1000, value=10000, step=1000)
         seed = st.number_input("Random seed:", min_value=0, value=1, step=1)
 
         if product_choice != st.session_state.get("priced_product_choice", None):
