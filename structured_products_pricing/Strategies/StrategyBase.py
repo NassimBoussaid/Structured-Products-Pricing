@@ -76,11 +76,8 @@ class StrategyBase(ABC):
         priceDown: float = self.price()
         # Restore original spot
         self.Market.und_price = originalMarket.und_price
-        # Calculate gamma based on delta differences
-        deltaUp: float = (priceUp - price) / shift
-        deltaDown: float = (price - priceDown) / shift
 
-        return abs(deltaUp - deltaDown) / shift
+        return (priceUp - 2 * price + priceDown) / (shift**2)
 
     def vega(self) -> float:
         """
