@@ -92,8 +92,7 @@ def run():
         elif pricer_choice == "Trinomial Tree":
             n_steps = st.number_input("Number of tree steps:", min_value=10, value=50, step=10)
             pruning_mode = str(st.radio("Apply pruning?", ["Yes", "No"], horizontal=True) == "Yes")
-            pruning_limit = st.number_input("Pruning limit:", min_value=0.0, value=0,0000001, step=0,00001, format="%f")
-
+            pruning_limit = st.number_input("Pruning limit:", min_value=0.0, value=0.0000001, step=0.00001, format="%f")
 
         if (option_type != st.session_state.get("priced_option_type", None)) or (pricer_choice != st.session_state.get("priced_pricer_choice", None)):
             for key in ["strategy", "price", "greeks", "greeks_spot_range", "show_greeks", "show_graphs"]:
