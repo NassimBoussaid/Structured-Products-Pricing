@@ -28,7 +28,6 @@ class InterestRateSwap(BondBase):
             issue_date: Union[str, datetime],
             maturity_date: Union[str, datetime],
             fixed_rate: float,
-            index_curve,
             spread: float = 0.0,
             frequency: str = 'yearly',
             day_count: str = 'act/365.25'
@@ -47,11 +46,11 @@ class InterestRateSwap(BondBase):
             notional=notional,
             issue_date=issue_date,
             maturity_date=maturity_date,
-            index_curve=index_curve,
             spread=spread,
             frequency=frequency,
             day_count=day_count
         )
+        self.day_count = day_count
 
     def get_cashflows(self) -> List[CashFlow]:
         """

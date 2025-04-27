@@ -35,20 +35,20 @@ class OptionPricerMC(OptionPricerBase):
         Returns:
         - S_t: np.array. Asset prices as an array.
         """
-        vols = self.vol_curve[None, :]
+        vol = self.Market.vol
         if self.Market.div_mode == "discrete":
             # Calculate the step on which the dividend occurs
             step_div = int(self.Market.time_to_div / self.dt) + 1
             # Compute the simulated asset price before the dividend step
             S_pre_div: np.array = (self.Market.und_price
-                                   * np.exp(np.cumsum((self.rates_path[:, :step_div] - 0.5 * vols[:, :step_div] ** 2)
-                                                      * self.dt + vols[:, :step_div]
+                                   * np.exp(np.cumsum((self.rates_path[:, :step_div] - 0.5 * vol ** 2)
+                                                      * self.dt + vol
                                                       * (brownian_paths[:, 1: step_div]
                                                          - brownian_paths[:, :step_div - 1]), axis=1)))
             # Compute the simulated asset price after the dividend step
             S_post_div: np.array = ((S_pre_div[:, -1][:, np.newaxis] - self.Market.div_discrete)
-                                    * np.exp(np.cumsum((self.rates_path[:, step_div:] - 0.5 * vols[:, step_div:] ** 2)
-                                                       * self.dt + vols[:, step_div:]
+                                    * np.exp(np.cumsum((self.rates_path[:, step_div:] - 0.5 * vol ** 2)
+                                                       * self.dt + vol
                                                        * (brownian_paths[:, step_div:]
                                                           - brownian_paths[:, step_div - 1: -1]), axis=1)))
             # Merge the simulated asset price before and after the dividend step
@@ -57,16 +57,16 @@ class OptionPricerMC(OptionPricerBase):
         elif use_incremental_method:
             # Compute the simulated asset price at maturity
             S_t: np.array = (self.Market.und_price
-                             * np.exp((self.rates_path - self.Market.div_rate - 0.5 * vols ** 2)
+                             * np.exp((self.rates_path - self.Market.div_rate - 0.5 * vol ** 2)
                                       * (self.dt * np.arange(self.Pricer.nb_steps + 1))[np.newaxis, :]
-                                      + vols * brownian_paths))
+                                      + vol * brownian_paths))
         else:
             # Extract the final Brownian motion values
             final_brownian_values: np.array = brownian_paths[:, -1]
             # Compute the simulated asset price at maturity
             S_T: np.array = (self.Market.und_price
-                             * np.exp((self.rates_path[:, -2] - self.Market.div_rate - 0.5 * vols[:, -2] ** 2)
-                                      * self.Option.time_to_maturity + vols[:, -2] * final_brownian_values))
+                             * np.exp((self.rates_path[:, -2] - self.Market.div_rate - 0.5 * vol ** 2)
+                                      * self.Option.time_to_maturity + vol * final_brownian_values))
             return S_T
 
         return S_t if full_paths else S_t[:, -1]

@@ -33,11 +33,10 @@ class PricerClient:
         self.market = Market(
             underlying_price=100,
             volatility=0.20,
-            vol_mode="constant",
             interest_rate=0.02,
-            rate_mode="constant",
+            rate_mode="stochastic rate",
             div_mode="Continuous",
-            dividend_rate=0.035,
+            dividend_rate=0.00,
             dividend_discrete=0.00,
             dividend_date=datetime(2025, 6, 1)
         )
@@ -48,7 +47,7 @@ class PricerClient:
         self.pricer_mc = PricerMC(
             pricing_date=datetime(2025, 1, 1),
             nb_steps=50,
-            nb_draws=1000,
+            nb_draws=10,
             seed=1
         )
         print("✅ Pricer ready.\n")
@@ -158,7 +157,7 @@ def main():
     client.setup_market()
     client.setup_pricer_mc()
     client.setup_pricer_bs()
-
+    """
     client.setup_strategy_1()
     client.run_pricing()
     client.run_greeks_analysis()
@@ -166,8 +165,10 @@ def main():
     client.run_pricing()
     client.setup_strategy_3()
     client.run_pricing()
+    """
     client.setup_strategy_4()
     client.run_pricing()
+    """
     client.setup_strategy_5()
     client.run_pricing()
     client.setup_strategy_6()
@@ -175,6 +176,7 @@ def main():
 
     client.setup_strategy_7()
     client.run_pricing() 
+    """
 
 
 

@@ -3,6 +3,8 @@ from structured_products_pricing.Parameters.Bond.BondBase import BondBase
 from structured_products_pricing.Parameters.Market import Market
 from structured_products_pricing.Utils.Calendar import Calendar
 import math
+import datetime as datetime
+
 
 class RatePricerManager:
     """
@@ -12,10 +14,10 @@ class RatePricerManager:
           - self.day_count
     """
 
-    def __init__(self, MarketObject: Market, BondObject: BondBase, PricerObject: PricerBase):
+    def __init__(self, MarketObject: Market, BondObject: BondBase, pricing_date: datetime):
         self.Market = MarketObject
         self.Product = BondObject
-        self.Pricer = PricerObject
+        self.pricing_date = pricing_date
 
     def accrued_interest(self) -> float:
         """
@@ -25,12 +27,12 @@ class RatePricerManager:
          - product.day_count
          - coupon_rate ou index_curve + spread
         """
-        past = [d for d in self.Product.calendar.observation_dates if d <= self.Pricer.pricing_date]
+        past = [d for d in self.Product.calendar.observation_dates if d <= self.pricing_date]
         if not past:
             return 0.0
 
         last_coupon = max(past)
-        accrual = self.Product.calendar.year_fraction(last_coupon, self.Pricer.pricing_date, self.Product.day_count)
+        accrual = self.Product.calendar.year_fraction(last_coupon, self.pricing_date, self.Product.day_count)
 
         if hasattr(self.Product, 'coupon_rate'):  # Fixed Rate Bond
             rate = self.Product.coupon_rate
@@ -46,7 +48,7 @@ class RatePricerManager:
         calendar = Calendar(start_date=self.Product.issue_date, end_date=self.Product.maturity_date)
         dirty = 0.0
         for cf in self.Product.get_cashflows():
-            t = calendar.year_fraction(self.Pricer.pricing_date, cf.date, self.Pricer.day_count)
+            t = calendar.year_fraction(self.pricing_date, cf.date, self.Product.day_count)
             df = math.exp(-self.Market.int_rate * t)
             dirty += cf.amount * df
 

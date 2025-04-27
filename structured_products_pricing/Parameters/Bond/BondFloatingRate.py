@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Union, List
 from structured_products_pricing.Parameters.Bond.BondBase import BondBase
 from structured_products_pricing.Parameters.Bond.CashFlow import CashFlow
+from structured_products_pricing.Rate.RateCurve import RateCurve
 from structured_products_pricing.Utils.Calendar import Calendar
 
 class FloatingRateBond(BondBase):
@@ -25,13 +26,13 @@ class FloatingRateBond(BondBase):
             notional: float,
             issue_date: Union[str, datetime],
             maturity_date: Union[str, datetime],
-            index_curve,
             spread: float = 0.0,
             frequency: str = 'yearly',
             day_count: str = 'act/365.25'
     ):
         super().__init__(notional=notional, issue_date=issue_date, maturity_date=maturity_date)
-        self.index_curve = index_curve
+        self.index_curve = RateCurve(0.01, 0.01, 0.01, 1)
+        self.index_curve.compute_yield_curve()
         self.spread = spread
         self.day_count = day_count
         self.calendar = Calendar(

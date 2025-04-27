@@ -1,0 +1,126 @@
+from structured_products_pricing.Rate.RateCurve import RateCurve
+from structured_products_pricing.Rate.RateFlat import RateFlat
+from structured_products_pricing.Rate.RateStochastic import RateStochastic
+import numpy as np
+
+
+def get_stochastic_rates(interest_rate: float, time_to_maturity: float, nb_steps: int, nb_draws: int):
+    """
+    Generate stochastic interest rate paths and their associated discount factors.
+
+    Args:
+        interest_rate (float): Initial interest rate at time t=0.
+        time_to_maturity (float): Total time horizon (in years).
+        nb_steps (int): Number of time steps.
+        nb_draws (int): Number of Monte Carlo simulation paths.
+
+    Returns:
+        rates_path (np.ndarray): Simulated interest rate paths, shape (nb_draws, nb_steps+1).
+        df_path (np.ndarray): Corresponding discount factors between steps, shape (nb_draws, nb_steps).
+
+    Notes:
+        - rates_path[:, 0] corresponds to time 0.
+        - df_path[:, i] discounts cashflows from t_i to t_{i+1}.
+    """
+    dt = time_to_maturity / nb_steps
+
+    sto_rates = RateStochastic(interest_rate, 0.5, 0.03, 0.07, time_to_maturity)
+    sto_rates.compute_stochastic_rates(nb_steps, nb_draws)
+
+    rates_path = sto_rates.rates.T
+
+    df_path = np.exp(-rates_path[:, :] * dt)
+
+    return rates_path, df_path
+
+
+def get_deterministic_rates(interest_rate: float,
+                            rate_mode: str,
+                            time_to_maturity: float,
+                            nb_steps: int,
+                            nb_draws: int):
+    """
+    Generate deterministic rate paths and cumulative discount factors.
+
+    Args:
+        time_to_maturity (float): Total time horizon (in years).
+        nb_steps (int): Number of time steps.
+        nb_draws (int): Number of Monte Carlo draws (paths).
+
+    Returns:
+        rates (np.ndarray): Zero-coupon rates at each grid time, shape (nb_steps + 1,).
+        rates_path (np.ndarray): Broadcasted rates across all paths, shape (nb_draws, nb_steps + 1).
+        df (np.ndarray): Discount factors cumulative for each path, shape (nb_draws, nb_steps + 1).
+    """
+    if rate_mode.lower() == 'constant':
+        rate_curve = RateFlat(rate=interest_rate)
+
+    else:
+        rate_curve = RateCurve(0.01, 0.01, 0.01, 1)
+        rate_curve.compute_yield_curve()
+
+    dt = time_to_maturity / nb_steps
+
+    # Time grid: t_0, t_1, ..., t_nb_steps
+    t_grid = np.arange(0, nb_steps + 1) * dt
+
+    # Spot rates at each time step
+    rates = np.array([rate_curve.get_yield(t) for t in t_grid])
+
+    # Broadcast the rates to all paths
+    rates_path = np.broadcast_to(rates[np.newaxis, :], (nb_draws, rates.size))
+
+    # Cumulative sum of rates * dt
+    cum_rates = np.cumsum(rates_path * dt, axis=1)
+
+    # Discount factors = exp(-int_0^t r(s) ds)
+    df = np.exp(-cum_rates)
+
+    return rates, rates_path, df
+
+
+def generate_rates_paths(mode: str,
+                         time_to_maturity: float,
+                         nb_steps: int,
+                         nb_draws: int,
+                         interest_rate: float = None):
+    """
+    Dispatch function to generate rates, rates_path, and discount factors
+    depending on the chosen mode ('stochastic' or 'deterministic').
+
+    Args:
+        mode (str): 'stochastic' or 'deterministic'.
+        rate_curve (object): Object with .get_yield(t) method (for deterministic mode).
+        time_to_maturity (float): Total time horizon.
+        nb_steps (int): Number of steps.
+        nb_draws (int): Number of paths.
+        interest_rate (float, optional): Initial rate (required if mode is 'stochastic').
+
+    Returns:
+        rates (np.ndarray or None): Zero-coupon rates if deterministic, None if stochastic.
+        rates_path (np.ndarray): Path of simulated or deterministic rates.
+        df (np.ndarray): Discount factors associated with rates_path.
+    """
+    mode = mode.lower()
+
+    if mode == "stochastic rate":
+        if interest_rate is None:
+            raise ValueError("interest_rate must be provided for stochastic rate generation.")
+        rates_path, df = get_stochastic_rates(
+            interest_rate=interest_rate,
+            time_to_maturity=time_to_maturity,
+            nb_steps=nb_steps,
+            nb_draws=nb_draws
+        )
+        rates = None  # not used in stochastic mode
+
+    else:
+        rates, rates_path, df = get_deterministic_rates(
+            interest_rate=interest_rate,
+            rate_mode=mode,
+            time_to_maturity=time_to_maturity,
+            nb_steps=nb_steps,
+            nb_draws=nb_draws
+        )
+
+    return rates, rates_path, df

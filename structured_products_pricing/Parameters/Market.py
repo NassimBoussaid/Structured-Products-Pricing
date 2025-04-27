@@ -4,12 +4,13 @@ from structured_products_pricing.Volatility.FlatVolatility import FlatVolatility
 from structured_products_pricing.Rate.RateCurve import RateCurve
 from structured_products_pricing.Rate.RateFlat import RateFlat
 
+
 class Market:
     """
     Class to handle market parameters such as spot price, volatility, interest rate, and dividends.
     """
 
-    def __init__(self, underlying_price: float, vol_mode: str, volatility: float, rate_mode: str, interest_rate: float,
+    def __init__(self, underlying_price: float, volatility: float, rate_mode: str, interest_rate: float,
                  div_mode: str,
                  dividend_rate: float, dividend_discrete: float, dividend_date: datetime):
         """
@@ -25,21 +26,10 @@ class Market:
         - dividend_date: datetime. Date when the discrete dividend is paid.
         """
         self.und_price: float = underlying_price
-        self.vol_mod = vol_mode
-        self.volatility = volatility
-        if self.vol_mod.lower() == "constant":
-            self.vol = FlatVolatility(volatility=volatility)
-        else:
-            from structured_products_pricing.Volatility.ImpliedVolatility import ImpliedVolatility
-            self.vol = ImpliedVolatility()
+        self.vol = volatility
 
         self.rate_mode: str = rate_mode
         self.int_rate = interest_rate
-        if self.rate_mode.lower() == 'constant':
-            self.rates = RateFlat(rate=interest_rate)
-        elif self.rate_mode.lower() == 'rate curve':
-            self.rates = RateCurve(0.01, 0.01, 0.01, 1)
-            self.rates.compute_yield_curve()
 
         self.div_mode: str = div_mode
         self.div_date: datetime = dividend_date

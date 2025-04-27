@@ -1,3 +1,5 @@
+from structured_products_pricing.Parameters.Bond.BondFixedRate import FixedRateBond
+from structured_products_pricing.Parameters.Bond.BondFloatingRate import FloatingRateBond
 from structured_products_pricing.Parameters.Bond.InterestRateSwap import InterestRateSwap
 from structured_products_pricing.Parameters.ModelParams import ModelParams
 from structured_products_pricing.Parameters.Option.OptionEuropean import OptionEuropean
@@ -25,7 +27,7 @@ from structured_products_pricing.Strategies.StrategiesOption.StrategyDigitalRepl
 from structured_products_pricing.Volatility.ImpliedVolatility import ImpliedVolatility
 
 # calendar = Calendar(start_date=datetime(2024, 1, 1), end_date=datetime(2024, 1, 1))
-Market_Info = Market(100, 0.2, 0.02, "Continuous",
+Market_Info = Market(100, 0.2,"constant", 0.02, "Continuous",
                      0.035, 0, datetime(2024, 6, 1))
 Pricer_Info = PricerMC(datetime(2024, 1, 1), 10, 10000, 1)
 # Pricer_Info = PricerTree(datetime(2024, 10, 11), 500, "False", 1e-7)
@@ -65,7 +67,7 @@ Option_Info = OptionEuropean("Call", 100, datetime(2026, 1, 1))
 # MC = MonteCarlo(Params_Info)
 # price = MC.price_vector()
 # print(price)
-
+"""
 implied_vol = ImpliedVolatility()
 implied_vol.initialize_surface(Market_Info, Option_Info, Pricer_Info)
 x = implied_vol.get_volatility(173, 200)
@@ -74,19 +76,21 @@ rate_curve = RateCurve(0.01, 0.01, 0.01, 1)
 rate_curve.compute_yield_curve()
 print(rate_curve.get_yield(0.33))
 
-'''
+
 # Test Curve Nico
 rate_curve = RateCurve(0.01, 0.01, 0.01, 1)
 rate_curve.compute_yield_curve()
 print(rate_curve.get_yield(0.33))
-
+"""
 ##### Test Taux #####
-pricer = RatePricer(pricing_date=datetime(2025, 1, 1), day_count='act/365.25')
+
 
 # Zero Coupon Bond
 zc = ZeroCouponBond(notional=1, issue_date='2025-01-01', maturity_date='2027-01-01')
-price_zcb = pricer.compute_price(zc, Market_Info)
-print(f"Prix Zero Coupon Bond: {price_zcb:.4f}")
+pricer = RatePricerManager(MarketObject=Market_Info,
+                           BondObject=zc,
+                           pricing_date=datetime(2025, 1, 1))
+print(f"Prix Zero Coupon Bond: {pricer.compute_price():.4f}")
 
 # Fixed Rate Bond
 bond = FixedRateBond(
@@ -97,21 +101,24 @@ bond = FixedRateBond(
     frequency='yearly',
     day_count='30/360'
 )
-price_frb = pricer.compute_price(bond, Market_Info, clean=False)
-print(f"Prix Fixed Rate Bond: {price_frb:.4f}")
+pricer = RatePricerManager(MarketObject=Market_Info,
+                           BondObject=bond,
+                           pricing_date=datetime(2025, 1, 1))
+print(f"Prix Fixed Rate Bond: {pricer.compute_price():.4f}")
 
 # Floating Rate Bond
 flb = FloatingRateBond(
     notional=1,
     issue_date='2025-01-01',
     maturity_date='2027-01-01',
-    index_curve=rate_curve,
     spread=0.002,  # 20 bps de marge
     frequency='yearly',
     day_count='30/360'
 )
-price = pricer.compute_price(flb, Market_Info)
-print(f"Prix Floating Rate Bond : {price:.4f}")
+pricer = RatePricerManager(MarketObject=Market_Info,
+                           BondObject=flb,
+                           pricing_date=datetime(2025, 1, 1))
+print(f"Prix Floating Rate Bond: {pricer.compute_price():.4f}")
 
 # Swap
 swap = InterestRateSwap(
@@ -119,29 +126,12 @@ swap = InterestRateSwap(
     issue_date='2025-01-01',
     maturity_date='2027-01-01',
     fixed_rate=0.02,  # 2% fixe
-    index_curve=rate_curve,  # patte flottante
     spread=0.0,  # pas de spread
     frequency='yearly',
     day_count='act/365.25'
 )
-price = pricer.compute_price(swap, Market_Info)
-print(f"Prix Interest Rate Swap : {price:.4f}")
-'''
+pricer = RatePricerManager(MarketObject=Market_Info,
+                           BondObject=swap,
+                           pricing_date=datetime(2025, 1, 1))
+print(f"Prix Swap: {pricer.compute_price():.4f}")
 
-# Swap
-swap = InterestRateSwap(
-    notional=1,
-    issue_date='2025-01-01',
-    maturity_date='2027-01-01',
-    fixed_rate=0.02,  # 2% fixe
-    index_curve=rate_curve,  # patte flottante
-    spread=0.0,  # pas de spread
-    frequency='yearly',
-    day_count='act/365.25'
-)
-price = pricer.compute_price(swap, Market_Info)
-print(f"Prix Interest Rate Swap : {price:.4f}")
-
-sto_rates = RateStochastic(0.03, 0.5, 0.03, 0.07, 10)
-# sto_rates.compute_stochastic_rates(1000,10)
-# sto_rates.plot_rates()

@@ -20,7 +20,7 @@ class OptionPricerBS(OptionPricerBase):
         super().__init__(model_params)
         self.und_price: float = self.Market.und_price
         self.int_rate: float = self.Market.rates.get_yield(0)  # Constant rate in BS hypothesis
-        self.vol: float = self.Market.vol.get_volatility(0, 0)   # Constant volatility in BS hypothesis
+        self.vol: float = self.Market.vol   # Constant volatility in BS hypothesis
         self.div: float = self.Market.div_rate
         self.strike: float = self.Option.strike
         self.time_to_maturity: float = self.Option.time_to_maturity
