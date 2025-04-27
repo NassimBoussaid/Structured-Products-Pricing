@@ -164,6 +164,8 @@ The web app allows you to:
 - Compute and visualize prices and greeks.
 - Perform stress tests over spot ranges.
 
+![Streamlit GIF](images/streamlit_interface.png)
+
 ---
 
 ## Examples of Supported Products
