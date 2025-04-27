@@ -5,10 +5,12 @@ from structured_products_pricing.Utils.RegressionModel import RegressionModel
 from structured_products_pricing.Products.Options.OptionPricerBase import OptionPricerBase
 import numpy as np
 
+
 class OptionPricerMC(OptionPricerBase):
     """
     Class to compute option prices using Monte Carlo.
     """
+
     def __init__(self, model_params: ModelParams):
         """
         Initializes MonteCarlo.
@@ -33,42 +35,41 @@ class OptionPricerMC(OptionPricerBase):
         Returns:
         - S_t: np.array. Asset prices as an array.
         """
+        vols = self.vol_curve[None, :]
         if self.Market.div_mode == "discrete":
             # Calculate the step on which the dividend occurs
             step_div = int(self.Market.time_to_div / self.dt) + 1
             # Compute the simulated asset price before the dividend step
             S_pre_div: np.array = (self.Market.und_price
-                                   * np.exp(np.cumsum((self.Market.int_rate - 0.5 * self.Market.vol ** 2)
-                                                      * self.dt + self.Market.vol
+                                   * np.exp(np.cumsum((self.rates_path[:, :step_div] - 0.5 * vols[:, :step_div] ** 2)
+                                                      * self.dt + vols[:, :step_div]
                                                       * (brownian_paths[:, 1: step_div]
                                                          - brownian_paths[:, :step_div - 1]), axis=1)))
             # Compute the simulated asset price after the dividend step
             S_post_div: np.array = ((S_pre_div[:, -1][:, np.newaxis] - self.Market.div_discrete)
-                                   * np.exp(np.cumsum((self.Market.int_rate - 0.5 * self.Market.vol ** 2)
-                                                      * self.dt + self.Market.vol
-                                                      * (brownian_paths[:, step_div:]
-                                                         - brownian_paths[:, step_div - 1: -1]), axis=1)))
+                                    * np.exp(np.cumsum((self.rates_path[:, step_div:] - 0.5 * vols[:, step_div:] ** 2)
+                                                       * self.dt + vols[:, step_div:]
+                                                       * (brownian_paths[:, step_div:]
+                                                          - brownian_paths[:, step_div - 1: -1]), axis=1)))
             # Merge the simulated asset price before and after the dividend step
             S_t = np.hstack((S_pre_div, S_post_div))
+
         elif use_incremental_method:
             # Compute the simulated asset price at maturity
             S_t: np.array = (self.Market.und_price
-                             * np.exp((self.Market.int_rate - self.Market.div_rate - 0.5 * self.Market.vol ** 2)
+                             * np.exp((self.rates_path - self.Market.div_rate - 0.5 * vols ** 2)
                                       * (self.dt * np.arange(self.Pricer.nb_steps + 1))[np.newaxis, :]
-                                      + self.Market.vol * brownian_paths))
+                                      + vols * brownian_paths))
         else:
             # Extract the final Brownian motion values
             final_brownian_values: np.array = brownian_paths[:, -1]
             # Compute the simulated asset price at maturity
             S_T: np.array = (self.Market.und_price
-                             * np.exp((self.Market.int_rate - self.Market.div_rate - 0.5 * self.Market.vol ** 2)
-                                      * self.Option.time_to_maturity + self.Market.vol * final_brownian_values))
+                             * np.exp((self.rates_path[:, -2] - self.Market.div_rate - 0.5 * vols[:, -2] ** 2)
+                                      * self.Option.time_to_maturity + vols[:, -2] * final_brownian_values))
             return S_T
 
-        if full_paths:
-            return S_t
-        else:
-            return S_t[:, -1]
+        return S_t if full_paths else S_t[:, -1]
 
     def calculate_standard_deviation(self, payoff: np.array) -> float:
         """
@@ -95,13 +96,17 @@ class OptionPricerMC(OptionPricerBase):
         self.Option.time_to_maturity = (self.Option.maturity_date - self.Pricer.pricing_date).days / 365
         self.Market.time_to_div = (self.Market.div_date - self.Pricer.pricing_date).days / 365
         # Initialize the Brownian motion class
-        brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps, self.Pricer.nb_draws,
+        brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps,
+                                                self.Pricer.nb_draws,
                                                 self.Pricer.seed)
         # Generate independent Brownian motion paths
         brownian_paths: np.array = brownian_simulator.MotionVector()
+
         # Compute the simulated asset price at maturity
-        if (self.Option.option_name == "Barrier" and self.Option.barrier_exercise == "American") or self.Option.option_name == "Asian":
-            S_T: np.array = self.compute_asset_price(brownian_paths, full_paths=True, use_incremental_method=True)
+        if (
+                self.Option.option_name == "Barrier" and self.Option.barrier_exercise == "American") or self.Option.option_name == "Asian":
+            S_T: np.array = self.compute_asset_price(brownian_paths, full_paths=True,
+                                                     use_incremental_method=True)
         else:
             S_T: np.array = self.compute_asset_price(brownian_paths)
         # Compute the average payoff of the option
@@ -109,7 +114,7 @@ class OptionPricerMC(OptionPricerBase):
         # Compute the standard deviation
         std: float = self.calculate_standard_deviation(payoff)
         # Discount the expected payoff back to present value
-        price: float = np.mean(payoff) * np.exp(-self.Market.int_rate * self.Option.time_to_maturity)
+        price: float = np.mean(payoff * self.df[:, -2])
 
         # return np.array((price, std))
         return np.array(price)
@@ -129,15 +134,18 @@ class OptionPricerMC(OptionPricerBase):
             - "duration": Expected duration of the product (in years).
         """
         # Initialize the Brownian motion class
-        brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps, self.Pricer.nb_draws,
+        brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps,
+                                                self.Pricer.nb_draws,
                                                 self.Pricer.seed)
         # Generate independent Brownian motion paths
         brownian_paths: np.array = brownian_simulator.MotionVector()
         # Compute the simulated asset price at maturity
-        S_t: np.array = self.compute_asset_price(brownian_paths, full_paths=True, use_incremental_method=True)
+        S_t: np.array = self.compute_asset_price(brownian_paths, full_paths=True,
+                                                 use_incremental_method=True)
         # Set up calendar and observations
         calendar = Calendar(self.Pricer.pricing_date, self.Option.maturity_date, frequency)
-        time_to_obs = [(observation - self.Pricer.pricing_date).days / 365 for observation in calendar.observation_dates]
+        time_to_obs = [(observation - self.Pricer.pricing_date).days / 365 for observation in
+                       calendar.observation_dates]
         # Map each observation time to the corresponding time step index
         obs_steps = [int(observation / self.dt) + 1 for observation in time_to_obs]
         obs_steps[-1] = self.Pricer.nb_steps
@@ -165,12 +173,14 @@ class OptionPricerMC(OptionPricerBase):
         - price: np.array. Option price as a float.
         """
         # Initialize the Brownian motion class
-        brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps, self.Pricer.nb_draws,
+        brownian_simulator: Brownian = Brownian(self.Option.time_to_maturity, self.Pricer.nb_steps,
+                                                self.Pricer.nb_draws,
                                                 self.Pricer.seed)
         # Generate independent Brownian motion paths
         brownian_paths: np.array = brownian_simulator.MotionVector()
         # Generate independent Brownian motion paths & Compute the simulated asset price at maturity
-        S_t: np.array = self.compute_asset_price(brownian_paths, use_incremental_method=True, full_paths=True)
+        S_t: np.array = self.compute_asset_price(brownian_paths, use_incremental_method=True,
+                                                 full_paths=True)
         # Initialize the Regression class
         regression = RegressionModel(self.Option.regression_type, self.Option.regression_degree)
         # At maturity, the payoff is the same as a European option
@@ -178,9 +188,9 @@ class OptionPricerMC(OptionPricerBase):
         # Loop over the number of time steps
         for i in reversed(range(2, self.Pricer.nb_steps + 1)):
             # Discount cashflow from the next period
-            cashflow *= self.df
+            cashflow *= self.df[:, i - 1]
             # Store asset price for the current period
-            X = S_t[:, i-1]
+            X = S_t[:, i - 1]
             # Compute the payoff
             exercise = self.Option.payoff(X)
             # Keep paths eligible for regression (ITM paths)
@@ -194,7 +204,7 @@ class OptionPricerMC(OptionPricerBase):
             # Set paths for which exercise decision is optimal to the payoff value
             cashflow[ex_idx] = exercise[ex_idx]
         # Perform discounting of the cashflow matrix
-        cashflow *= self.df
+        cashflow *= self.df[:, 0]
         # Compute the average discounted value for all paths
         price = np.mean(cashflow)
         # Compute the standard deviation

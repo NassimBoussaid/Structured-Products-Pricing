@@ -6,6 +6,10 @@ from copy import copy
 from abc import ABC
 import numpy as np
 
+from structured_products_pricing.Rate.RateFlat import RateFlat
+from structured_products_pricing.Volatility.FlatVolatility import FlatVolatility
+
+
 class StrategyBase(ABC):
     """
     Abstract base class to handle structured strategies composed of multiple products.
@@ -87,15 +91,16 @@ class StrategyBase(ABC):
         - float. Strategy Vega.
         """
         shift: float = 0.01
+
         originalMarket: Market = copy(self.Market)
         # Compute price after positive shift
-        self.Market.vol = originalMarket.vol + shift
+        self.Market.vol = FlatVolatility(volatility=originalMarket.volatility + shift)
         priceUp: float = self.price()
         # Compute price after negative shift
-        self.Market.vol = originalMarket.vol - shift
+        self.Market.vol = FlatVolatility(volatility=originalMarket.volatility - shift)
         priceDown: float = self.price()
         # Restore original volatility
-        self.Market.vol = originalMarket.vol
+        self.Market.vol = FlatVolatility(volatility=originalMarket.volatility)
 
         return (priceUp - priceDown) / (2 * shift) / 100
 
@@ -129,12 +134,12 @@ class StrategyBase(ABC):
         shift: float = 0.01
         originalMarket: Market = copy(self.Market)
         # Compute price after positive shift
-        self.Market.int_rate = originalMarket.int_rate + shift
+        self.Market.rates = RateFlat(rate=originalMarket.int_rate + shift)
         priceUp: float = self.price()
         # Compute price after negative shift
-        self.Market.int_rate = originalMarket.int_rate - shift
+        self.Market.rates = RateFlat(rate=originalMarket.int_rate - shift)
         priceDown: float = self.price()
-        self.Market.int_rate = originalMarket.int_rate
+        self.Market.rates = RateFlat(rate=originalMarket.int_rate)
 
         return (priceUp - priceDown) / (2 * shift) / 100
 

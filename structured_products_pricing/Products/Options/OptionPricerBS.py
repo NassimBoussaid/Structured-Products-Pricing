@@ -4,10 +4,12 @@ from math import exp, sqrt, log
 from scipy.stats import norm
 import numpy as np
 
+
 class OptionPricerBS(OptionPricerBase):
     """
     Class to compute option prices using Black Scholes.
     """
+
     def __init__(self, model_params: ModelParams):
         """
         Initializes BlackScholes.
@@ -17,12 +19,12 @@ class OptionPricerBS(OptionPricerBase):
         """
         super().__init__(model_params)
         self.und_price: float = self.Market.und_price
-        self.int_rate: float = self.Market.int_rate
-        self.vol: float = self.Market.vol
+        self.int_rate: float = self.Market.rates.get_yield(0)  # Constant rate in BS hypothesis
+        self.vol: float = self.Market.vol.get_volatility(0, 0)   # Constant volatility in BS hypothesis
         self.div: float = self.Market.div_rate
         self.strike: float = self.Option.strike
         self.time_to_maturity: float = self.Option.time_to_maturity
-        self.d1: float = ((log(self.und_price/self.strike) + (self.int_rate - self.div + self.vol**2/2)
+        self.d1: float = ((log(self.und_price / self.strike) + (self.int_rate - self.div + self.vol ** 2 / 2)
                            * self.time_to_maturity) / (self.vol * sqrt(self.time_to_maturity)))
         self.d2: float = self.d1 - self.vol * sqrt(self.time_to_maturity)
 
@@ -36,11 +38,11 @@ class OptionPricerBS(OptionPricerBase):
         # Call option
         if self.Option.is_call():
             price: float = self.und_price * exp(-self.div * self.time_to_maturity) * norm.cdf(self.d1) \
-                    - exp(-self.int_rate * self.time_to_maturity) * self.strike * norm.cdf(self.d2)
+                           - exp(-self.int_rate * self.time_to_maturity) * self.strike * norm.cdf(self.d2)
         # Put option
         elif self.Option.is_put():
             price: float = exp(-self.int_rate * self.time_to_maturity) * self.strike * norm.cdf(-self.d2) \
-                    - self.und_price * exp(-self.div * self.time_to_maturity) * norm.cdf(-self.d1)
+                           - self.und_price * exp(-self.div * self.time_to_maturity) * norm.cdf(-self.d1)
         return price
 
     def delta(self) -> float:
@@ -66,7 +68,7 @@ class OptionPricerBS(OptionPricerBase):
         - gamma: float. Option Gamma.
         """
         gamma: float = exp(-self.div * self.time_to_maturity) * norm.pdf(self.d1) \
-                / (self.und_price * self.vol * sqrt(self.time_to_maturity))
+                       / (self.und_price * self.vol * sqrt(self.time_to_maturity))
         return gamma
 
     def vega(self) -> float:
@@ -76,8 +78,9 @@ class OptionPricerBS(OptionPricerBase):
         Returns:
         - vega: float. Option Vega.
         """
-        vega: float = self.und_price * exp(-self.div * self.time_to_maturity) * norm.pdf(self.d1) * sqrt(self.time_to_maturity)
-        return vega/100
+        vega: float = self.und_price * exp(-self.div * self.time_to_maturity) * norm.pdf(self.d1) * sqrt(
+            self.time_to_maturity)
+        return vega / 100
 
     def theta(self) -> float:
         """
@@ -89,14 +92,16 @@ class OptionPricerBS(OptionPricerBase):
         if self.Option.is_call():
             theta: float = (-exp(-self.div * self.time_to_maturity) * self.und_price * norm.pdf(self.d1)
                             * self.vol / (2 * sqrt(self.time_to_maturity))
-                            - self.int_rate * self.strike * exp(-self.int_rate * self.time_to_maturity) * norm.cdf(self.d2)
+                            - self.int_rate * self.strike * exp(-self.int_rate * self.time_to_maturity) * norm.cdf(
+                        self.d2)
                             + self.div * self.und_price * exp(-self.div * self.time_to_maturity) * norm.cdf(self.d1))
         elif self.Option.is_put():
             theta: float = (-exp(-self.div * self.time_to_maturity) * self.und_price * norm.pdf(self.d1)
                             * self.vol / (2 * sqrt(self.time_to_maturity))
-                            + self.int_rate * self.strike * exp(-self.int_rate * self.time_to_maturity) * norm.cdf(-self.d2)
+                            + self.int_rate * self.strike * exp(-self.int_rate * self.time_to_maturity) * norm.cdf(
+                        -self.d2)
                             - self.div * self.und_price * exp(-self.div * self.time_to_maturity) * norm.cdf(-self.d1))
-        return theta/252
+        return theta / 252
 
     def rho(self) -> float:
         """
@@ -106,10 +111,12 @@ class OptionPricerBS(OptionPricerBase):
         - rho: float. Option Rho.
         """
         if self.Option.is_call():
-            rho: float = self.strike * self.time_to_maturity * exp(-self.int_rate * self.time_to_maturity) * norm.cdf(self.d2)
+            rho: float = self.strike * self.time_to_maturity * exp(-self.int_rate * self.time_to_maturity) * norm.cdf(
+                self.d2)
         elif self.Option.is_put():
-            rho: float = -self.strike * self.time_to_maturity * exp(-self.int_rate * self.time_to_maturity) * norm.cdf(-self.d2)
-        return rho/100
+            rho: float = -self.strike * self.time_to_maturity * exp(-self.int_rate * self.time_to_maturity) * norm.cdf(
+                -self.d2)
+        return rho / 100
 
     def vomma(self) -> float:
         """

@@ -40,7 +40,7 @@ class Node:
         """
         Creates an upper node, links it and sets its basic information.
         """
-        self.node_up = Node(self.und_price * self.tree.alpha, node_down=self, tree=self.tree)
+        self.node_up = Node(self.und_price * self.tree.alpha[self.layer], node_down=self, tree=self.tree)
         self.node_up.layer = self.layer
         self.node_up.trunc = self.trunc
         self.node_up.level = self.level + 1
@@ -49,7 +49,7 @@ class Node:
         """
         Creates a lower node, links it and sets its basic information.
         """
-        self.node_down = Node(self.und_price / self.tree.alpha, node_up=self, tree=self.tree)
+        self.node_down = Node(self.und_price / self.tree.alpha[self.layer], node_up=self, tree=self.tree)
         self.node_down.layer = self.layer
         self.node_down.trunc = self.trunc
         self.node_down.level = self.level - 1
@@ -74,14 +74,14 @@ class Node:
         """
         # Expected Value and Variance calculation
         Expected_Value: float = self.forward_value()
-        Variance: float = (self.und_price ** 2 * exp(2 * self.tree.Market.int_rate * self.tree.dt)
-                           * (exp(self.tree.Market.vol**2 * self.tree.dt) - 1))
+        Variance: float = (self.und_price ** 2 * exp(2 * self.tree.rates[self.layer] * self.tree.dt)
+                           * (exp(self.tree.vol_curve[self.layer]**2 * self.tree.dt) - 1))
         # Probabilities calculation
         self.p_down = ((self.next_node_mid.und_price ** (-2) * (Variance + Expected_Value ** 2)
-                       - 1 - (self.tree.alpha + 1) * (self.next_node_mid.und_price ** (-1) * Expected_Value - 1))
-                       / ((1 - self.tree.alpha) * (self.tree.alpha ** (-2) - 1)))
+                       - 1 - (self.tree.alpha[self.layer] + 1) * (self.next_node_mid.und_price ** (-1) * Expected_Value - 1))
+                       / ((1 - self.tree.alpha[self.layer]) * (self.tree.alpha[self.layer] ** (-2) - 1)))
         self.p_up = (self.next_node_mid.und_price ** (-1) * Expected_Value
-                     - 1 - (self.tree.alpha ** (-1) - 1) * self.p_down) / (self.tree.alpha - 1)
+                     - 1 - (self.tree.alpha[self.layer] ** (-1) - 1) * self.p_down) / (self.tree.alpha[self.layer] - 1)
         self.p_mid = 1 - self.p_up - self.p_down
         if self.p_down < 0 or self.p_up < 0 or self.p_mid < 0:
             print(f"Error: Negative probabilities at layer {self.layer} and level {self.level}")
@@ -129,7 +129,7 @@ class Node:
         if self.next_node_down is not None:
             Discounted_Value += self.next_node_down.price * self.p_down
         # Discount the value
-        Discounted_Value *= exp(-self.tree.Market.int_rate * self.tree.dt)
+        Discounted_Value *= exp(-self.tree.rates[self.layer] * self.tree.dt)
 
         # Check if the option is european
         if self.tree.Option.option_name == "European":
@@ -151,8 +151,8 @@ class Node:
         Returns:
         - bool. Determines whether the candidate node is within the valid interval.
         """
-        return ((self.forward_value() < candidate_node.und_price * (1 + self.tree.alpha) / 2)
-                and (self.forward_value() > candidate_node.und_price * (1 + self.tree.alpha) / (2 * self.tree.alpha)))
+        return ((self.forward_value() < candidate_node.und_price * (1 + self.tree.alpha[self.layer]) / 2)
+                and (self.forward_value() > candidate_node.und_price * (1 + self.tree.alpha[self.layer]) / (2 * self.tree.alpha[self.layer])))
 
     def forward_value(self) -> float:
         """
@@ -163,9 +163,9 @@ class Node:
         """
         # Check if the dividend is paid in the next window and adapt the formula
         if self.trunc.is_div_next_period:
-            return self.und_price * exp(self.tree.Market.int_rate * self.tree.dt) - self.tree.Market.div_discrete
+            return self.und_price * exp(self.tree.rates[self.layer] * self.tree.dt) - self.tree.Market.div_discrete
         else:
-            return self.und_price * exp(self.tree.Market.int_rate * self.tree.dt)
+            return self.und_price * exp(self.tree.rates[self.layer] * self.tree.dt)
 
     def are_same_dates(self, d1: float, d2: float) -> bool:
         """
@@ -207,7 +207,7 @@ class Node:
                     ValDown = self.next_node_down.pricing_cursed()
                     self.price += ValDown * self.p_down
                 # Discount the price
-                self.price *= exp(-self.tree.Market.int_rate * self.tree.dt)
+                self.price *= exp(-self.tree.rates[self.layer] * self.tree.dt)
                 # Check if the option is american
                 if self.tree.Option.is_american():
                     self.price = max(self.price, self.compute_intrinsic_value())

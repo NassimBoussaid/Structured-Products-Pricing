@@ -21,7 +21,7 @@ class OptionPricerTree(OptionPricerBase):
         self.edge: list = []
         self.graph_mode: bool = False
         self.div_dt: float = self.Market.time_to_div / self.nb_steps
-        self.alpha: float = exp(self.Market.vol * sqrt(3 * self.dt))
+        self.alpha: float = exp(self.vol_curve * sqrt(3 * self.dt))
         self.root: Node = Node(self.Market.und_price, tree=self)
         self.root.level = 0
         self.root.layer = 0
