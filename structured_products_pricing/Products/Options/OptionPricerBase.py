@@ -30,8 +30,7 @@ class OptionPricerBase(ABC):
             self.rates, self.rates_path, self.df = generate_rates_paths(interest_rate=self.Market.int_rate,
                                                                         mode=self.Market.rate_mode,
                                                                         time_to_maturity=self.Option.time_to_maturity,
-                                                                        nb_steps=self.Pricer.nb_steps,
-                                                                        nb_draws=self.Pricer.nb_draws)
+                                                                        pricer=self.Pricer)
 
 
 @abstractmethod

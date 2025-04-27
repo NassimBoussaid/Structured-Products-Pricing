@@ -1,3 +1,4 @@
+from structured_products_pricing.Parameters import Pricer
 from structured_products_pricing.Rate.RateCurve import RateCurve
 from structured_products_pricing.Rate.RateFlat import RateFlat
 from structured_products_pricing.Rate.RateStochastic import RateStochastic
@@ -37,8 +38,7 @@ def get_stochastic_rates(interest_rate: float, time_to_maturity: float, nb_steps
 def get_deterministic_rates(interest_rate: float,
                             rate_mode: str,
                             time_to_maturity: float,
-                            nb_steps: int,
-                            nb_draws: int):
+                            pricer: Pricer):
     """
     Generate deterministic rate paths and cumulative discount factors.
 
@@ -59,30 +59,32 @@ def get_deterministic_rates(interest_rate: float,
         rate_curve = RateCurve(0.01, 0.01, 0.01, 1)
         rate_curve.compute_yield_curve()
 
-    dt = time_to_maturity / nb_steps
+    dt = time_to_maturity / pricer.nb_steps
 
     # Time grid: t_0, t_1, ..., t_nb_steps
-    t_grid = np.arange(0, nb_steps + 1) * dt
+    t_grid = np.arange(0, pricer.nb_steps + 1) * dt
 
     # Spot rates at each time step
     rates = np.array([rate_curve.get_yield(t) for t in t_grid])
 
     # Broadcast the rates to all paths
-    rates_path = np.broadcast_to(rates[np.newaxis, :], (nb_draws, rates.size))
+    if pricer.pricer_name == "Tree":
+        rates_path = None
+        df = None
+    else:
+        rates_path = np.broadcast_to(rates[np.newaxis, :], (pricer.nb_draws, rates.size))
 
-    # Cumulative sum of rates * dt
-    cum_rates = np.cumsum(rates_path * dt, axis=1)
-
-    # Discount factors = exp(-int_0^t r(s) ds)
-    df = np.exp(-cum_rates)
+        # Cumulative sum of rates * dt
+        cum_rates = np.cumsum(rates_path * dt, axis=1)
+        # Discount factors = exp(-int_0^t r(s) ds)
+        df = np.exp(-cum_rates)
 
     return rates, rates_path, df
 
 
 def generate_rates_paths(mode: str,
                          time_to_maturity: float,
-                         nb_steps: int,
-                         nb_draws: int,
+                         pricer: Pricer,
                          interest_rate: float = None):
     """
     Dispatch function to generate rates, rates_path, and discount factors
@@ -109,8 +111,8 @@ def generate_rates_paths(mode: str,
         rates_path, df = get_stochastic_rates(
             interest_rate=interest_rate,
             time_to_maturity=time_to_maturity,
-            nb_steps=nb_steps,
-            nb_draws=nb_draws
+            nb_steps=pricer.nb_steps,
+            nb_draws=pricer.nb_draws
         )
         rates = None  # not used in stochastic mode
 
@@ -119,8 +121,6 @@ def generate_rates_paths(mode: str,
             interest_rate=interest_rate,
             rate_mode=mode,
             time_to_maturity=time_to_maturity,
-            nb_steps=nb_steps,
-            nb_draws=nb_draws
-        )
+            pricer=pricer)
 
     return rates, rates_path, df
