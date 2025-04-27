@@ -13,6 +13,7 @@ def setup_pricer_client():
     market = Market(
         underlying_price=100,
         volatility=0.20,
+        rate_mode="constant",
         interest_rate=0.02,
         div_mode="Continuous",
         dividend_rate=0.035,
