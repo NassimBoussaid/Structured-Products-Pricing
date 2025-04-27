@@ -94,13 +94,13 @@ class StrategyBase(ABC):
 
         originalMarket: Market = copy(self.Market)
         # Compute price after positive shift
-        self.Market.vol = FlatVolatility(volatility=originalMarket.vol + shift)
+        self.Market.vol = originalMarket.vol + shift
         priceUp: float = self.price()
         # Compute price after negative shift
-        self.Market.vol = FlatVolatility(volatility=originalMarket.vol - shift)
+        self.Market.vol = originalMarket.vol - shift
         priceDown: float = self.price()
         # Restore original volatility
-        self.Market.vol = FlatVolatility(volatility=originalMarket.vol)
+        self.Market.vol = originalMarket.vol
 
         return (priceUp - priceDown) / (2 * shift) / 100
 
