@@ -46,7 +46,17 @@ def run():
             div_mode = "Continuous"
             dividend_discrete = 0.0
 
-        interest_rate = st.number_input("Interest rate (in %):", min_value=0.0, value=2.0, format="%.2f") / 100
+        if pricer_choice in ["Black-Scholes", "Trinomial Tree"]:
+            st.write("Rate mode: Constant")
+            rate_mode = "Constant"
+            interest_rate = st.number_input("Interest rate (in %):", min_value=0.0, value=2.0, format="%.2f") / 100
+        else:
+            rate_mode = st.selectbox("Rate mode:", ["Constant", "Rate Curve", "Stochastic Rate"])
+            if rate_mode == "Constant":
+                interest_rate = st.number_input("Interest rate (in %):", min_value=0.0, value=2.0, format="%.2f") / 100
+            else:
+                interest_rate = 0.02
+
         volatility = st.number_input("Volatility (in %):", min_value=0.0, value=20.0, format="%.2f") / 100
         strike = st.number_input("Strike:", min_value=0.0, value=100.0)
 
@@ -95,7 +105,7 @@ def run():
     with col_right:
         if price_button:
             with st.spinner("Pricing in progress..."):
-                market = Market(stock_price, volatility, interest_rate, div_mode, dividend_yld, dividend_discrete, dividend_date_obj)
+                market = Market(stock_price, volatility,rate_mode, interest_rate, div_mode, dividend_yld, dividend_discrete, dividend_date_obj)
 
                 if family == "European":
                     option = OptionEuropean(cp_type, strike, maturity_date_obj)
