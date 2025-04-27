@@ -29,6 +29,7 @@ PAGES = {
     "Barrier Options":    "views.barrier_option",
     "Certificates":       "views.certificate",
     "Structured Products": "views.structured_products",
+    "Fixed Income": "views.fixedincome",
 }
 
 # CURRENT STATE
@@ -90,6 +91,9 @@ if active_page == "Home":
         {"title": "Structured Products",
          "subtitle": ["Reverse Convertibles", "Autocalls", "Barrier Reverse Convertibles"],
          "key": "Structured Products"},
+        {"title": "Fixed Income",
+         "subtitle": ["Zero Coupon Bond", "Fixed Rate Bond", "Floating Rate Bond", "Interest Rate Swap"],
+         "key": "Fixed Income"},
     ]
 
     for row in range(0, len(cards), 3):
