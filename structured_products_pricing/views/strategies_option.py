@@ -55,9 +55,15 @@ def run():
 
         st.subheader("Market Parameters")
         stock_price = st.number_input("Stock price:", min_value=0.0, value=100.0)
-        interest_rate = st.number_input("Interest rate:", min_value=0.0, value=0.02)
         dividend_yield = st.number_input("Dividend yield:", min_value=0.0, value=0.035)
         volatility = st.number_input("Volatility:", min_value=0.0, value=0.2)
+
+        rate_mode = st.selectbox("Rate Mode:", ["Constant", "Rate Curve", "Stochastic Rate"])
+        if rate_mode == "Constant":
+            interest_rate = st.number_input("Interest rate:", value=0.02)
+        else:
+            interest_rate = 0.02
+
 
         st.subheader("Dates")
         pricing_date = st.date_input("Pricing date:", value=datetime(2024, 1, 1))
@@ -83,7 +89,7 @@ def run():
     with col_right:
         if price_button:
             with st.spinner("Pricing in progress..."):
-                market = Market(stock_price, volatility, interest_rate, "Continuous", dividend_yield, 0, dividend_date_obj)
+                market = Market(stock_price, volatility,rate_mode, interest_rate, "Continuous", dividend_yield, 0, dividend_date_obj)
                 pricer = PricerMC(pricing_date_obj, n_steps, n_draws, seed)
 
                 strat = None
