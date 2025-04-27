@@ -27,7 +27,6 @@ class PricerClient:
         print("Setting up the Market...")
         self.market = Market(
             underlying_price=100,
-            vol_mode="constant",
             volatility=0.20,
             rate_mode="constant",
             interest_rate=0.02,
