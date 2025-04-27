@@ -75,8 +75,8 @@ def run():
         maturity_date_obj = datetime.combine(maturity_date, datetime.min.time())
 
         st.subheader("Monte Carlo Parameters")
-        n_steps = st.number_input("Number of time steps:", min_value=1, value=100)
-        n_draws = st.number_input("Number of paths:", min_value=1000, value=20000, step=1000)
+        n_steps = st.number_input("Number of time steps:", min_value=1, value=50)
+        n_draws = st.number_input("Number of paths:", min_value=1000, value=10000, step=1000)
         seed = st.number_input("Random seed:", min_value=0, value=1, step=1)
 
         if strategy_type != st.session_state.get("priced_strategy_type", None):
