@@ -76,11 +76,8 @@ class StrategyBase(ABC):
         priceDown: float = self.price()
         # Restore original spot
         self.Market.und_price = originalMarket.und_price
-        # Calculate gamma based on delta differences
-        deltaUp: float = abs((priceUp - price) / shift)
-        deltaDown: float = abs((price - priceDown) / shift)
 
-        return (deltaUp - deltaDown) / shift
+        return (priceUp - 2 * price + priceDown) / (shift**2)
 
     def vega(self) -> float:
         """
@@ -148,7 +145,10 @@ class StrategyBase(ABC):
         Returns:
         - np.array. [Delta, Gamma, Vega, Theta, Rho]
         """
-        return np.array([self.delta(), self.gamma(), self.vega(), self.theta(), self.rho()])
+        if self.Pricer.pricer_name == "MC" or self.Pricer.pricer_name == "Tree":
+            return np.array([self.delta(), self.gamma(), self.vega(), self.theta(), self.rho()])
+        elif self.Pricer.pricer_name == "BS":
+            return self.products_params[0].compute_bs_greeks()
 
     def greeks_over_spot_range(self, is_option: bool = False):
         """
@@ -174,11 +174,12 @@ class StrategyBase(ABC):
         for spot in spot_values:
             self.Market.und_price = spot
             price_list.append(self.price())
-            delta_list.append(self.delta())
-            gamma_list.append(self.gamma())
-            vega_list.append(self.vega())
-            theta_list.append(self.theta())
-            rho_list.append(self.rho())
+            greeks = self.greeks()
+            delta_list.append(greeks[0])
+            gamma_list.append(greeks[1])
+            vega_list.append(greeks[2])
+            theta_list.append(greeks[3])
+            rho_list.append(greeks[4])
 
         greeks = {"Spot": np.array(spot_values), "Payoff": np.array(payoff_list),
                   "Price": np.array(price_list), "Delta": np.array(delta_list),

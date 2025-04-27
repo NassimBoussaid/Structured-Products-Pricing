@@ -52,3 +52,13 @@ class OptionPricerManager:
         """
         if self.Pricer.pricer_name == "MC":
             return OptionPricerMC(self.Models_Params).compute_autocall_probabilities(autocall_barrier, frequency)
+
+    def compute_bs_greeks(self) -> np.array:
+        """
+        Computes the greeks of for BS pricer.
+
+        Returns:
+        - np.array. The computed greeks.
+        """
+        if self.Pricer.pricer_name == "BS":
+            return OptionPricerBS(self.Models_Params).greeks()
