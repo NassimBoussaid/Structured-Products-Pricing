@@ -28,9 +28,16 @@ def run():
 
         st.subheader("Market Parameters")
         stock_price = st.number_input("Stock price:", min_value=0.0, value=100.0)
-        interest_rt = st.number_input("Interest rate:", min_value=0.0, value=0.02)
         dividend_yld = st.number_input("Dividend yield:", min_value=0.0, value=0.035)
         volatility = st.number_input("Volatility:", min_value=0.0, value=0.2)
+
+        rate_mode = st.selectbox("Rate Mode:", ["Constant", "Rate Curve", "Stochastic Rate"])
+        if rate_mode == "Constant":
+            interest_rt = st.number_input("Interest rate:", value=0.02)
+        else:
+            interest_rt = 0.02
+
+
 
         st.subheader("Option Parameters")
         strike = st.number_input("Strike:", min_value=0.0, value=100.0)
@@ -82,7 +89,7 @@ def run():
         if price_button:
             with st.spinner("Pricing in progress..."):
                 market = Market(
-                    stock_price, volatility, interest_rt, "Continuous",
+                    stock_price, volatility,rate_mode, interest_rt, "Continuous",
                     dividend_yld, 0.0, datetime.combine(dividend_date, datetime.min.time())
                 )
                 option = OptionBarrier(
