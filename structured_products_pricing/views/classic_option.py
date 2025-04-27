@@ -86,13 +86,13 @@ def run():
 
         st.subheader("Pricer Parameters")
         if pricer_choice == "Monte Carlo":
-            n_steps = st.number_input("Number of time steps:", min_value=1, value=100)
-            n_draws = st.number_input("Number of paths:", min_value=1000, value=20_000, step=1000)
+            n_steps = st.number_input("Number of time steps:", min_value=1, value=50)
+            n_draws = st.number_input("Number of paths:", min_value=1000, value=10_000, step=1000)
             seed = st.number_input("Random seed:", min_value=0, value=1, step=1)
         elif pricer_choice == "Trinomial Tree":
-            n_steps = st.number_input("Number of tree steps:", min_value=10, value=500, step=10)
+            n_steps = st.number_input("Number of tree steps:", min_value=10, value=50, step=10)
             pruning_mode = str(st.radio("Apply pruning?", ["Yes", "No"], horizontal=True) == "Yes")
-            pruning_limit = st.number_input("Pruning limit:", min_value=0.0, value=0.001, step=0.001, format="%f")
+            pruning_limit = st.number_input("Pruning limit:", min_value=0.0, value=0,0000001, step=0,00001, format="%f")
 
 
         if (option_type != st.session_state.get("priced_option_type", None)) or (pricer_choice != st.session_state.get("priced_pricer_choice", None)):
