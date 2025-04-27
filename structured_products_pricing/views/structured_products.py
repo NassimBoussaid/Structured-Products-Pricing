@@ -164,10 +164,10 @@ def run():
             st.markdown(f"### Graphs : {product_choice}")
             with st.spinner("Loading Graphs..." if st.session_state["greeks_spot_range"] is None else "Loading..."):
                 if st.session_state["greeks_spot_range"] is None:
-                    st.session_state["greeks_spot_range"] = st.session_state["strategy"].greeks_over_spot_range(is_option=True)
+                    st.session_state["greeks_spot_range"] = st.session_state["strategy"].greeks_over_spot_range(is_option=False)
                 greeks_spot_range = st.session_state["greeks_spot_range"]
 
-                tabs = st.tabs(["Payoff","Premium", "Delta", "Gamma", "Vega", "Theta", "Rho"])
+                tabs = st.tabs(["Premium", "Delta", "Gamma", "Vega", "Theta", "Rho"])
 
                 def plot_greek_simple(x, y, greek_name):
                     fig = go.Figure()
@@ -187,16 +187,14 @@ def run():
                     st.plotly_chart(fig, use_container_width=True)
 
                 with tabs[0]:
-                    plot_greek_simple(greeks_spot_range['Spot'], greeks_spot_range['Payoff'], "Payoff")
-                with tabs[1]:
                     plot_greek_simple(greeks_spot_range['Spot'], greeks_spot_range['Price'], "Premium")
-                with tabs[2]:
+                with tabs[1]:
                     plot_greek_simple(greeks_spot_range['Spot'], greeks_spot_range['Delta'], "Delta")
-                with tabs[3]:
+                with tabs[2]:
                     plot_greek_simple(greeks_spot_range['Spot'], greeks_spot_range['Gamma'], "Gamma")
-                with tabs[4]:
+                with tabs[3]:
                     plot_greek_simple(greeks_spot_range['Spot'], greeks_spot_range['Vega'], "Vega")
-                with tabs[5]:
+                with tabs[4]:
                     plot_greek_simple(greeks_spot_range['Spot'], greeks_spot_range['Theta'], "Theta")
-                with tabs[6]:
+                with tabs[5]:
                     plot_greek_simple(greeks_spot_range['Spot'], greeks_spot_range['Rho'], "Rho")
