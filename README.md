@@ -60,6 +60,14 @@ Structured-Product-Pricing/
 │   ├── Utils/                       # Utility scripts
 │   ├── Volatility/                  # Volatility calibration tools
 │   ├── Demo.py                      # Demonstration script
+│   ├── App.py                       # Streamlit Interface script
+│   ├── Views/                       # Individual Streamlit interface of each product
+│   │   ├── Asian_option/             # Streamlit view for Asian options
+│   │   ├── Barrier_option/           # Streamlit view for Barrier options
+│   │   ├── Certificate/              # Streamlit view for Certificates (Discount, Bonus, Airbag, etc.)
+│   │   ├── Classic_option.py         # Base class for classic vanilla options
+│   │   ├── Strategies_option.py      # Base class for static option strategies (spreads, condor, strangle...)
+│   │   ├── Structured_product.py     # Base class for structured products (reverse convertible, autocallable, etc.)
 ├── tests/                           # Unit and functional test scripts (pytest framework)
 ├── LICENSE                          # License information
 ├── poetry.lock                      # Dependency lock file
