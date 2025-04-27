@@ -155,7 +155,7 @@ This will test key components like pricers, strategies, and market setups.
 To launch the Streamlit dashboard:
 
 ```bash
-poetry run streamlit run structured_products_pricing/app.py ????
+poetry run streamlit run structured_products_pricing/app.py
 ```
 
 The web app allows you to:

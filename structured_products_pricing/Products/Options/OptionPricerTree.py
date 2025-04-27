@@ -191,6 +191,9 @@ class OptionPricerTree(OptionPricerBase):
         Returns:
         - float. The option price.
         """
+        # Recompute time to maturity and time to dividend
+        self.Option.time_to_maturity = (self.Option.maturity_date - self.Pricer.pricing_date).days / 365
+        self.Market.time_to_div = (self.Market.div_date - self.Pricer.pricing_date).days / 365
         self.create_tree()
         current_node: Node = self.last_node
         prev_node: Node = current_node.node_behind
